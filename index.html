@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>signal.fm -- discover what's next</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Apply theme before render to prevent flash -->
+  <script>
+    (function() {
+      var theme = localStorage.getItem('mixtape_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <h1 class="logo">signal<span class="logo-dot">.fm</span></h1>
+    </div>
+    <div class="header-right">
+      <button id="theme-toggle" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <button id="save-playlist-btn" class="btn btn-secondary" style="display:none;">Save Playlist</button>
+      <button id="connect-btn" class="btn btn-primary">Connect Spotify</button>
+      <button id="disconnect-btn" class="btn btn-secondary" style="display:none;">Disconnect</button>
+    </div>
+  </header>
+
+  <!-- Main layout -->
+  <div class="main-layout">
+
+    <!-- Sidebar: signal toggles and Last.fm -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Signals</h3>
+        <label class="toggle-row">
+          <input type="checkbox" id="toggle-artist-similar" checked>
+          <span class="toggle-label">Artist similarity</span>
+          <span class="badge badge-purple">Last.fm</span>
+        </label>
+        <label class="toggle-row">
+          <input type="checkbox" id="toggle-track-similar" checked>
+          <span class="toggle-label">Track similarity</span>
+          <span class="badge badge-teal">Last.fm</span>
+        </label>
+        <label class="toggle-row">
+          <input type="checkbox" id="toggle-new-releases" checked>
+          <span class="toggle-label">New releases</span>
+          <span class="badge badge-coral">Spotify</span>
+        </label>
+      </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Last.fm (optional)</h3>
+        <div class="lfm-input-row">
+          <input type="text" id="lfm-username" placeholder="Last.fm username" class="input-field">
+          <button id="lfm-save-btn" class="btn btn-small">Save</button>
+        </div>
+        <p class="sidebar-hint" id="lfm-status">Adds scrobble history to your seed pool</p>
+      </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Seed Artists</h3>
+        <div id="seed-artist-list" class="seed-list">
+          <p class="sidebar-hint">Connect Spotify to see your seeds</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Feed -->
+    <main class="feed-container">
+      <!-- Pre-connect state -->
+      <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-content">
+          <h2>Discover what's next</h2>
+          <p>signal.fm builds a living feed of tracks you haven't heard yet, driven by what you already love.</p>
+          <div class="signal-cards">
+            <div class="signal-card">
+              <span class="signal-icon">~</span>
+              <strong>Artist similarity</strong>
+              <span>Explore artists related to your favourites</span>
+            </div>
+            <div class="signal-card">
+              <span class="signal-icon">&</span>
+              <strong>Track similarity</strong>
+              <span>Find tracks that sound like what you love</span>
+            </div>
+            <div class="signal-card">
+              <span class="signal-icon">*</span>
+              <strong>New releases</strong>
+              <span>Fresh music from artists you follow</span>
+            </div>
+          </div>
+          <button id="welcome-connect-btn" class="btn btn-primary btn-large">Connect Spotify to start</button>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      <div id="feed-loading" class="feed-loading" style="display:none;">
+        <div class="spinner"></div>
+        <p>Building your discovery feed...</p>
+      </div>
+
+      <!-- Track feed -->
+      <div id="feed" class="feed" style="display:none;"></div>
+
+      <!-- Infinite scroll sentinel -->
+      <div id="feed-sentinel" class="feed-sentinel"></div>
+
+      <!-- Empty state -->
+      <div id="feed-empty" class="feed-empty" style="display:none;">
+        <p>No tracks found. Try enabling more signals or connecting Last.fm for richer results.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Player bar -->
+  <div id="player-bar" class="player-bar" style="display:none;">
+    <div class="player-track-info">
+      <img id="player-art" class="player-art" src="" alt="">
+      <div class="player-text">
+        <span id="player-track-name" class="player-track-name"></span>
+        <span id="player-artist-name" class="player-artist-name"></span>
+      </div>
+      <button id="player-heart" class="icon-btn player-heart" title="Like">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+    </div>
+    <div class="player-controls">
+      <button id="player-prev" class="icon-btn" title="Previous">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button id="player-play" class="icon-btn player-play-btn" title="Play">
+        <svg class="icon-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <svg class="icon-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button id="player-next" class="icon-btn" title="Next">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+    </div>
+    <div class="player-progress-wrap">
+      <span id="player-time-current" class="player-time">0:00</span>
+      <div id="player-progress-bar" class="player-progress-bar">
+        <div id="player-progress" class="player-progress"></div>
+      </div>
+      <span id="player-time-total" class="player-time">0:00</span>
+    </div>
+    <div class="player-volume-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      <input type="range" id="player-volume" class="player-volume" min="0" max="100" value="70">
+    </div>
+  </div>
+
+  <!-- Scripts: strict load order, no modules -->
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/spotify.js"></script>
+  <script src="js/lastfm.js"></script>
+  <script src="js/seeds.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
