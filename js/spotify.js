@@ -314,7 +314,7 @@ async function savePlaylist() {
   // Add tracks in batches of 100
   for (var i = 0; i < uris.length; i += 100) {
     var batch = uris.slice(i, i + 100);
-    await spPost('/playlists/' + playlist.id + '/tracks', { uris: batch });
+    await spPost('/playlists/' + playlist.id + '/items', { uris: batch });
   }
   alert('Playlist saved: ' + name);
 }
@@ -322,21 +322,21 @@ async function savePlaylist() {
 // ---- Like/unlike ----
 
 async function likeTrack(trackId) {
-  await spPut('/me/tracks', { ids: [trackId] });
+  await spPut('/me/library', { uris: ['spotify:track:' + trackId] });
   likedSet.add(trackId);
 }
 
 async function unlikeTrack(trackId) {
-  await spDelete('/me/tracks', { ids: [trackId] });
+  await spDelete('/me/library', { uris: ['spotify:track:' + trackId] });
   likedSet.delete(trackId);
 }
 
 async function checkLikedTracks(trackIds) {
   if (trackIds.length === 0) return;
-  // Spotify allows max 50 IDs per call
   for (var i = 0; i < trackIds.length; i += 50) {
     var batch = trackIds.slice(i, i + 50);
-    var data = await spGet('/me/tracks/contains?ids=' + batch.join(','));
+    var uris = batch.map(function(id) { return 'spotify:track:' + id; });
+    var data = await spGet('/me/library/contains?uris=' + uris.join(','));
     if (!data) continue;
     for (var j = 0; j < batch.length; j++) {
       if (data[j]) likedSet.add(batch[j]);

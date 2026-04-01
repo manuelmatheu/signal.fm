@@ -45,10 +45,6 @@ async function buildSeedPool() {
   seedPool.artists = {};
   seedPool.tracks = {};
 
-  // 0. Fetch user profile to get market code
-  var me = await spGet('/me');
-  if (me && me.country) userMarket = me.country;
-
   // 1. Spotify top artists (medium_term ~6 months)
   var spotifyTop = await spGet('/me/top/artists?limit=10&time_range=medium_term');
   if (spotifyTop && spotifyTop.items) {
@@ -92,34 +88,20 @@ function needsSeedRebuild() {
 
 async function expandFromArtist(seedArtistName) {
   var similar = await getSimilarArtists(seedArtistName, 15);
-  var candidates = [];
-  var seedWeight = seedPool.artists[seedArtistName] || 0.5;
-
-  for (var i = 0; i < similar.length; i++) {
-    var s = similar[i];
-    candidates.push({
-      name: '',
-      artist: s.name,
-      mbid: s.mbid || null,
-      _source: 'artist_similar',
-      _sourceDetail: seedArtistName,
-      _weight: s.match * seedWeight
-    });
-  }
-
-  // For each similar artist, get their top tracks to have actual track names
-  var topArtists = similar.slice(0, 5);
   var trackCandidates = [];
+  var topArtists = similar.slice(0, 5);
+  var market = userMarket || 'US';
 
   for (var j = 0; j < topArtists.length; j++) {
-    var artistId = await resolveArtistId(topArtists[j].name);
-    if (!artistId) continue;
+    var name = topArtists[j].name;
+    // Use search instead of /artists/{id}/top-tracks (avoids 403 catalog restriction)
+    var data = await spGet('/search?q=artist:' + encodeURIComponent(name) + '&type=track&limit=3&market=' + market);
+    if (!data || !data.tracks || !data.tracks.items) continue;
 
-    var topTracks = await spGet('/artists/' + artistId + '/top-tracks?market=' + (userMarket || 'US'));
-    if (!topTracks || !topTracks.tracks) continue;
-
-    for (var k = 0; k < Math.min(topTracks.tracks.length, 3); k++) {
-      var t = topTracks.tracks[k];
+    for (var k = 0; k < data.tracks.items.length; k++) {
+      var t = data.tracks.items[k];
+      // Only tracks where the primary artist matches
+      if (t.artists[0].name.toLowerCase() !== name.toLowerCase()) continue;
       trackCandidates.push({
         uri: t.uri,
         id: t.id,
@@ -162,24 +144,28 @@ async function expandFromTrack(track) {
 // ---- New releases for top seed artists ----
 
 async function getNewReleasesForSeeds() {
-  // Get top N seed artists by weight
   var artistEntries = Object.entries(seedPool.artists);
   artistEntries.sort(function(a, b) { return b[1] - a[1]; });
   var topArtists = artistEntries.slice(0, NEW_RELEASE_MAX_ARTISTS);
 
   var cutoff = Date.now() - (NEW_RELEASE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
   var candidates = [];
+  var market = userMarket || 'US';
 
   for (var i = 0; i < topArtists.length; i++) {
     var artistName = topArtists[i][0];
-    var artistId = await resolveArtistId(artistName);
-    if (!artistId) continue;
+    // Use search instead of /artists/{id}/albums (avoids 403 catalog restriction)
+    var data = await spGet('/search?q=artist:' + encodeURIComponent(artistName) + '&type=album&limit=10&market=' + market);
+    if (!data || !data.albums || !data.albums.items) continue;
 
-    var albums = await spGet('/artists/' + artistId + '/albums?include_groups=album,single&limit=10&market=' + (userMarket || 'US'));
-    if (!albums || !albums.items) continue;
+    for (var j = 0; j < data.albums.items.length; j++) {
+      var album = data.albums.items[j];
+      // Verify primary artist matches (search can return loose results)
+      var artistMatch = album.artists.some(function(a) {
+        return a.name.toLowerCase() === artistName.toLowerCase();
+      });
+      if (!artistMatch) continue;
 
-    for (var j = 0; j < albums.items.length; j++) {
-      var album = albums.items[j];
       var releaseDate = new Date(album.release_date).getTime();
       if (releaseDate < cutoff) continue;
 
@@ -249,15 +235,12 @@ async function fetchCandidates() {
         }
       }
     } else if (artistNames.length > 0) {
-      // Fallback: get top tracks of a random seed artist and use those
+      // Fallback: search for a track by a random seed artist to seed track.getSimilar
       var randomArtist = artistNames[Math.floor(Math.random() * artistNames.length)];
-      var rId = await resolveArtistId(randomArtist);
-      if (rId) {
-        var rTop = await spGet('/artists/' + rId + '/top-tracks?market=' + (userMarket || 'US'));
-        if (rTop && rTop.tracks && rTop.tracks.length > 0) {
-          var seedTrack = rTop.tracks[0];
-          promises.push(expandFromTrack({ name: seedTrack.name, artist: seedTrack.artists[0].name }));
-        }
+      var rData = await spGet('/search?q=artist:' + encodeURIComponent(randomArtist) + '&type=track&limit=1&market=' + (userMarket || 'US'));
+      if (rData && rData.tracks && rData.tracks.items && rData.tracks.items.length > 0) {
+        var seedTrack = rData.tracks.items[0];
+        promises.push(expandFromTrack({ name: seedTrack.name, artist: seedTrack.artists[0].name }));
       }
     }
   }
