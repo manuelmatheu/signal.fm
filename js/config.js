@@ -2,7 +2,7 @@
    API keys, OAuth scopes, global state, constants */
 
 // Spotify OAuth
-var CLIENT_ID = 'YOUR_SPOTIFY_CLIENT_ID';
+var CLIENT_ID = '73fce01f5762463e86ff6555751a148c';
 var REDIRECT_URI = window.location.origin + window.location.pathname;
 var SCOPES = [
   'user-read-private', 'user-read-email',
