@@ -1,59 +1,58 @@
-# CLAUDE.md -- signal.fm Development Guide
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What is signal.fm?
 
-signal.fm is a passive music discovery web app. Where Scrobble Time Machine revisits the past and
-SpotiMix blends the present, signal.fm explores the future -- a living feed of tracks the user
-hasn't heard yet, driven by what they already love. Four signals feed the discovery engine:
-artist similarity, track similarity, new releases from favourite artists, and daily fresh rotation.
-The user scrolls, listens, likes, and the feed adapts in real time.
+signal.fm is a passive music discovery web app -- a living feed of tracks the user hasn't heard yet,
+driven by what they already love. Four signals feed the discovery engine: artist similarity, track
+similarity, new releases from favourite artists, and daily fresh rotation. The user scrolls, listens,
+likes, and the feed adapts in real time.
 
 **Repo:** https://github.com/manuelmatheu/signal-fm
-**Live:** https://signal-fm.vercel.app/ (or GitHub Pages TBD)
+**Live:** https://signal-fm.vercel.app/
 **Stack:** Vanilla JS, no framework, no build step. Spotify Web API + Web Playback SDK + Last.fm API.
+
+---
+
+## Commands
+
+There is no build step. Open `index.html` directly in a browser or serve with any static file server.
+
+**Syntax check before committing:**
+```
+node --check js/config.js
+node --check js/spotify.js
+node --check js/lastfm.js
+node --check js/seeds.js
+node --check js/player.js
+node --check js/ui.js
+```
+
+**Deploy:** Push to `main` -- Vercel auto-deploys.
 
 ---
 
 ## Architecture
 
-### File structure
-
-```
-signal-fm/
-├── index.html        -- HTML structure, feed container, player bar, signal toggles sidebar
-├── CLAUDE.md         -- This file
-├── README.md         -- User-facing docs
-├── ROADMAP.md        -- Phased feature plan
-├── css/
-│   └── style.css     -- All styles: dark/light theme via CSS vars, feed cards, player bar
-└── js/
-    ├── config.js     -- API keys, OAuth scopes, all global state, constants
-    ├── spotify.js    -- PKCE OAuth, token refresh, Spotify API helpers, SDK init, matchToSpotify
-    ├── lastfm.js     -- Last.fm API calls: getSimilarArtists, getSimilarTracks, lfm()
-    ├── seeds.js      -- Seed pool logic: build, expand, reweight, new releases, artist ID cache
-    ├── player.js     -- SDK events, polling fallback, player bar UI, liked songs
-    └── ui.js         -- Feed render, infinite scroll, signal toggles, badges, init()
-```
-
 ### Script load order (strict -- no modules)
 
 ```html
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
-<script src="js/config.js"></script>
-<script src="js/spotify.js"></script>
-<script src="js/lastfm.js"></script>
-<script src="js/seeds.js"></script>
-<script src="js/player.js"></script>
-<script src="js/ui.js"></script>
+<script src="js/config.js"></script>     <!-- globals first -->
+<script src="js/spotify.js"></script>    <!-- auth + API helpers + matchToSpotify -->
+<script src="js/lastfm.js"></script>     <!-- Last.fm API calls -->
+<script src="js/seeds.js"></script>      <!-- seed pool build, expand, reweight, new releases -->
+<script src="js/player.js"></script>     <!-- SDK events, polling fallback, player bar -->
+<script src="js/ui.js"></script>         <!-- feed render, infinite scroll, signal toggles, init() -->
 ```
 
-All functions and variables are global. No modules, no build step, no bundler.
+All functions and variables are global (`var`). No modules, no build step, no bundler.
 
 ### Theme system
 
-CSS variables in `:root` (light) and `[data-theme="dark"]` (dark). Theme toggle stored in
-`localStorage('mixtape_theme')`. Inline IIFE in `<head>` applies theme before page renders.
-Toggle icons: moon (dark) / sun (light). Same pattern as SpotiMix and Mixtape.
+CSS variables in `:root` (light) and `[data-theme="dark"]` (dark). Theme stored in
+`localStorage('mixtape_theme')`. Inline IIFE in `<head>` applies theme before render.
 
 Key CSS vars: `--bg`, `--fg`, `--surface`, `--border`, `--border-s`, `--rust`, `--gold`,
 `--sage`, `--card-shadow`, `--input-bg`, `--error-bg`.
@@ -63,76 +62,59 @@ Key CSS vars: `--bg`, `--fg`, `--surface`, `--border`, `--border-s`, `--rust`, `
 ## The four discovery signals
 
 All four feed into a shared candidate pool, deduplicated by Spotify URI, then rendered as
-track cards with a source badge. Signals can be toggled on/off via `signalWeights` in config.js.
+track cards with a source badge. Signals can be toggled via `signalWeights` in config.js.
 
-### 1. Artist similarity (Last.fm)
-- `artist.getSimilar` called for each artist in `seedPool.artists`
-- Results weighted by match score and artist weight in seed pool
-- Badge: "Similar to [seed artist]"
+| Signal | Source | Badge |
+|---|---|---|
+| Artist similarity | `artist.getSimilar` (Last.fm) per seed artist | "Similar to [artist]" (purple) |
+| Track similarity | `track.getSimilar` (Last.fm) per seed track | "Because you liked [track]" (teal) |
+| New releases | Spotify `/artists/{id}/albums` | "New release" (coral) |
+| Daily rotation | Rebuilt if `signal_seeds_date` > 24h old | any of the above |
 
-### 2. Track similarity (Last.fm)
-- `track.getSimilar` called for seed tracks (from likes + top tracks of seed artists)
-- Returns MusicBrainz track IDs -- must use name+artist fallback in matchToSpotify
-- Badge: "Because you liked [track name]"
-
-### 3. New releases (Spotify)
-- `GET /artists/{id}/albums?include_groups=album,single&limit=10`
-- Filtered to `NEW_RELEASE_WINDOW_DAYS` (180 days / 6 months)
-- CAPPED to top 5 seed artists by weight to limit API calls (max ~50 calls on load)
-- Fetch first 3 tracks per qualifying album via `GET /albums/{id}/tracks?limit=3`
-- Skip `matchToSpotify()` -- already Spotify-native
-- Badge: "New release"
-
-### 4. Daily rotation
-- On load, check `localStorage('signal_seeds_date')` -- if >24h old, rebuild seed pool
-- Fresh `artist.getSimilar` batch replaces previous session's expansion
-- Pre-generate next batch of 20 tracks in background while user listens
+New releases cap: top 5 seed artists only (`NEW_RELEASE_MAX_ARTISTS`) to limit API calls.
+New release tracks skip `matchToSpotify()` -- already Spotify-native.
 
 ---
 
 ## Seed pool
 
-The seed pool is the core of personalization. It's a weighted map of artists and tracks
-that drives all four signals. It updates in real time as the user interacts.
+The seed pool is the core of personalization -- a weighted map driving all four signals.
 
 ```js
-// config.js -- global seed state
-let seedPool = {
+// config.js -- all globals use var
+var seedPool = {
   artists: {},   // { 'Radiohead': 1.0, 'Portishead': 0.8, 'Mogwai': 0.6 }
   tracks: {}     // { 'track_mbid_or_uri': 1.0 }
 };
 
-let signalWeights = {
-  artistSimilar: true,
-  trackSimilar:  true,
-  newReleases:   true
-};
+var signalWeights = { artistSimilar: true, trackSimilar: true, newReleases: true };
 
-const NEW_RELEASE_WINDOW_DAYS = 180;
-const NEW_RELEASE_MAX_ARTISTS = 5;   // cap for new releases API calls
-const FEED_BATCH_SIZE = 20;          // tracks per infinite scroll load
-const ARTIST_ID_CACHE_TTL = 86400000; // 24h in ms
+var NEW_RELEASE_WINDOW_DAYS = 180;
+var NEW_RELEASE_MAX_ARTISTS = 5;
+var FEED_BATCH_SIZE = 20;
+var ARTIST_ID_CACHE_TTL = 86400000; // 24h in ms
 
-let heardUris = new Set();      // Spotify URIs already shown in feed
-let sessionFeed = [];           // ordered array of resolved track objects
-let isLoadingMore = false;      // infinite scroll guard
+var heardUris = new Set();      // Spotify URIs already shown in feed
+var sessionFeed = [];           // ordered array of resolved track objects
+var candidateBuffer = [];       // pre-generated next batch
+var isLoadingMore = false;      // infinite scroll guard
 ```
 
-### Building the seed pool on load (`seeds.js`)
+### Seed pool build on load (`seeds.js`)
 
-1. Spotify top artists (medium_term ~6 months) -> weight 1.0
-2. Last.fm recent scrobbles (if username set) -> weight += 0.1 per play
+1. Spotify top artists (`medium_term` ~6 months) -- weight 1.0
+2. Last.fm recent scrobbles (if username set) -- weight += 0.1 per play
 3. Cache Spotify artist IDs immediately for top artists
 
 ### Reweighting on interaction
 
-- `onLike(track)`: boost artist weight +0.3 (cap 1.5), add track as seed, expand
+- `onLike(track)`: boost artist weight +0.3 (cap 1.5), add track as seed, expand signals
 - `onSkip(track)`: deprioritize artist -0.2 (floor 0.1)
 
-### Artist ID resolution cache (`seeds.js`)
+### Artist ID resolution (`seeds.js`)
 
-Last.fm returns artist names; Spotify needs artist IDs. Cache the name->ID mapping
-in localStorage with 24h TTL.
+Last.fm returns artist names; Spotify needs IDs. Cache name->ID in `localStorage('signal_artist_ids')`
+with 24h TTL. Check cache first, fall back to Spotify search.
 
 ---
 
@@ -140,24 +122,25 @@ in localStorage with 24h TTL.
 
 ### OAuth (PKCE, no backend)
 
-Same pattern as SpotiMix. `startAuth()` -> redirect -> `exchangeCode(code)` -> store tokens.
+`startAuth()` -> redirect -> `exchangeCode(code)` -> store tokens in localStorage.
+`REDIRECT_URI = window.location.origin + window.location.pathname` -- adapts to any domain.
 
-Scopes: `user-read-private`, `user-read-email`, `user-top-read`,
-`user-read-recently-played`, `user-modify-playback-state`, `user-read-playback-state`,
-`user-read-currently-playing`, `playlist-modify-public`, `playlist-modify-private`,
-`streaming`, `user-library-modify`, `user-library-read`
+Scopes: `user-read-private`, `user-read-email`, `user-top-read`, `user-read-recently-played`,
+`user-modify-playback-state`, `user-read-playback-state`, `user-read-currently-playing`,
+`playlist-modify-public`, `playlist-modify-private`, `streaming`, `user-library-modify`,
+`user-library-read`
 
-Note: `user-top-read` is required for `GET /me/top/artists`.
+Note: `user-top-read` is required for `GET /me/top/artists` -- not in SpotiMix.
 
 ### Web Playback SDK
 
-Device named "signal.fm". `sdkReady` and `sdkDeviceId` globals.
-`pollNowPlaying()` fallback for mobile.
+Device named "signal.fm". `sdkReady` and `sdkDeviceId` globals track availability.
+`pollNowPlaying()` fallback at 5s interval for mobile (SDK not supported on all mobile browsers).
 
 ### Key API patterns
 
-- Playlist creation: always `/me/playlists`, NOT `/users/{id}/playlists`
-- Liked songs: body required for PUT `/me/tracks`
+- Playlist creation: always `/me/playlists`, NOT `/users/{id}/playlists` (avoids 403)
+- Liked songs: body required for `PUT /me/tracks`
 - Top artists: `GET /me/top/artists?limit=10&time_range=medium_term`
 - New releases: `GET /artists/{id}/albums?include_groups=album,single&limit=10`
 - Album tracks: `GET /albums/{albumId}/tracks?limit=3`
@@ -167,91 +150,65 @@ Device named "signal.fm". `sdkReady` and `sdkDeviceId` globals.
 ## Last.fm integration
 
 ```js
-const LFM_KEY = '177b9e8ee70fe2325bfff606cfdaee23'; // read-only, safe to expose
+var LFM_KEY = '177b9e8ee70fe2325bfff606cfdaee23'; // read-only, safe to expose
 ```
 
-### Endpoints used
-
-| Function | Method | Purpose |
+| Function | Endpoint | Purpose |
 |---|---|---|
 | `getSimilarArtists(name)` | `artist.getSimilar` | Expand seed artists |
 | `getSimilarTracks(name, artist)` | `track.getSimilar` | Expand seed tracks |
 | `getUserRecentTracks(user)` | `user.getRecentTracks` | Optional Last.fm seeding |
 
-### matchToSpotify()
-
-Searches Spotify by track name + artist, prefers exact artist name match.
-New release tracks skip this -- already Spotify-native.
+`track.getSimilar` returns MusicBrainz IDs -- `matchToSpotify()` handles both mbid and name+artist fallback.
 
 ---
 
-## Feed rendering and infinite scroll (`ui.js`)
+## Feed and player
 
-### Track card structure
+### Feed rendering (`ui.js`)
 
-Each card shows: album art, track name, artist, source badge, quick actions (add to queue, like).
+`renderTracks(tracks)` appends cards to `#feed`. Each card: album art, name, artist, source badge,
+heart button. Click card -> `playFromFeed(uri)`. Infinite scroll via `IntersectionObserver` on a
+sentinel element (200px rootMargin). `isLoadingMore` prevents concurrent fetches.
 
-Source badge values and colors:
-- `artist_similar` -> "Similar to [artist]" (purple)
-- `track_similar` -> "Because you liked [track]" (teal)
-- `new_release` -> "New release" (coral)
+### Player bar
 
-### Infinite scroll via IntersectionObserver
-
-Sentinel element observed with 200px rootMargin. `isLoadingMore` guard prevents
-concurrent batch fetches.
+Fixed bottom, hidden until first playback. `body.has-player` adds padding.
+SDK `player_state_changed` events drive updates; `pollNowPlaying()` is the remote fallback.
+`highlightNowPlaying(uri)` highlights the active card in the feed.
 
 ---
 
-## Player bar
+## localStorage keys
 
-Fixed bottom bar, hidden until first playback.
-- Album art, track name/artist, heart, prev/play-pause/next, progress, volume
-- `body.has-player` adds bottom padding
-- `likedSet` tracks liked state
-- `highlightNowPlaying(uri)` highlights card in feed
-
----
-
-## localStorage conventions
-
-| Key | Value | Purpose |
-|---|---|---|
-| `mixtape_theme` | `'dark'` / `'light'` | Theme (shared with other apps) |
-| `spotify_token` | string | Access token |
-| `spotify_refresh` | string | Refresh token |
-| `signal_lfm_username` | string | Optional Last.fm username |
-| `signal_artist_ids` | JSON object | Artist name -> Spotify ID cache (24h TTL) |
-| `signal_seeds_date` | ISO timestamp | Last seed pool build time (for daily refresh) |
+| Key | Purpose |
+|---|---|
+| `mixtape_theme` | Theme (`'dark'` / `'light'`) -- shared with SpotiMix |
+| `spotify_token` / `spotify_refresh` | OAuth tokens |
+| `signal_lfm_username` | Optional Last.fm username |
+| `signal_artist_ids` | Artist name -> Spotify ID cache (24h TTL) |
+| `signal_seeds_date` | Last seed pool build time (ISO timestamp) |
 
 ---
 
-## Important gotchas
+## Gotchas
 
-1. `user-top-read` scope is new -- not in SpotiMix
-2. track.getSimilar returns mbid, not Spotify URI -- matchToSpotify() handles both
-3. New releases cap: top 5 seed artists only
-4. include_groups filter required for album endpoint
-5. Artist ID resolution: check cache first, search as fallback
-6. heardUris dedup is feed-level
-7. Infinite scroll guard: isLoadingMore flag
-8. SDK + mobile: pollNowPlaying() fallback at 5s interval
-9. Pre-generate next batch in background
-10. ASCII-only in HTML comments
+- `track.getSimilar` returns mbid, not Spotify URI -- `matchToSpotify()` handles both
+- New releases: `include_groups=album,single` required; cap to top 5 seed artists
+- Artist ID resolution: check cache before searching Spotify
+- Spotify may return a new refresh token on refresh -- always overwrite stored value
+- `heardUris` deduplication is feed-level only (cleared on page reload)
+- Pre-generate `candidateBuffer` in background while user listens
+- ASCII-only in HTML comments
 
 ---
 
-## Deployment
+## Deployment and git
 
-- **Vercel** (production): auto-deploys from `main` branch
-- `REDIRECT_URI = window.location.origin + window.location.pathname`
-- Hard refresh needed on mobile after deploys
-
-## Git workflow
-
-- Single `main` branch, direct pushes
-- Always `node --check js/file.js` before committing
+- Vercel auto-deploys from `main`. Add each deployment URL as redirect URI in Spotify Dashboard.
+- Hard refresh (Cmd+Shift+R) on mobile after deploys to pick up changes.
+- Single `main` branch, direct pushes.
 
 ---
 
-*This file is for Claude Code / AI-assisted development. Keep it updated on every architectural change.*
+*Keep this file updated on every architectural change.*

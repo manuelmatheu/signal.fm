@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>signal.fm -- discover what's next</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="css/style.css">
   <!-- Apply theme before render to prevent flash -->
   <script>
@@ -79,19 +81,31 @@
           <p>signal.fm builds a living feed of tracks you haven't heard yet, driven by what you already love.</p>
           <div class="signal-cards">
             <div class="signal-card">
-              <span class="signal-icon">~</span>
-              <strong>Artist similarity</strong>
-              <span>Explore artists related to your favourites</span>
+              <div class="signal-icon purple">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
+              </div>
+              <div class="signal-card-text">
+                <strong>Artist similarity</strong>
+                <span>Explore artists related to your favourites</span>
+              </div>
             </div>
             <div class="signal-card">
-              <span class="signal-icon">&</span>
-              <strong>Track similarity</strong>
-              <span>Find tracks that sound like what you love</span>
+              <div class="signal-icon teal">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+              </div>
+              <div class="signal-card-text">
+                <strong>Track similarity</strong>
+                <span>Find tracks that sound like what you love</span>
+              </div>
             </div>
             <div class="signal-card">
-              <span class="signal-icon">*</span>
-              <strong>New releases</strong>
-              <span>Fresh music from artists you follow</span>
+              <div class="signal-icon coral">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <div class="signal-card-text">
+                <strong>New releases</strong>
+                <span>Fresh music from artists you follow</span>
+              </div>
             </div>
           </div>
           <button id="welcome-connect-btn" class="btn btn-primary btn-large">Connect Spotify to start</button>
