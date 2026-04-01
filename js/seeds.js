@@ -45,6 +45,10 @@ async function buildSeedPool() {
   seedPool.artists = {};
   seedPool.tracks = {};
 
+  // 0. Fetch user profile to get market code
+  var me = await spGet('/me');
+  if (me && me.country) userMarket = me.country;
+
   // 1. Spotify top artists (medium_term ~6 months)
   var spotifyTop = await spGet('/me/top/artists?limit=10&time_range=medium_term');
   if (spotifyTop && spotifyTop.items) {
@@ -111,7 +115,7 @@ async function expandFromArtist(seedArtistName) {
     var artistId = await resolveArtistId(topArtists[j].name);
     if (!artistId) continue;
 
-    var topTracks = await spGet('/artists/' + artistId + '/top-tracks?market=from_token');
+    var topTracks = await spGet('/artists/' + artistId + '/top-tracks?market=' + (userMarket || 'US'));
     if (!topTracks || !topTracks.tracks) continue;
 
     for (var k = 0; k < Math.min(topTracks.tracks.length, 3); k++) {
@@ -171,7 +175,7 @@ async function getNewReleasesForSeeds() {
     var artistId = await resolveArtistId(artistName);
     if (!artistId) continue;
 
-    var albums = await spGet('/artists/' + artistId + '/albums?include_groups=album,single&limit=10&market=from_token');
+    var albums = await spGet('/artists/' + artistId + '/albums?include_groups=album,single&limit=10&market=' + (userMarket || 'US'));
     if (!albums || !albums.items) continue;
 
     for (var j = 0; j < albums.items.length; j++) {
@@ -249,7 +253,7 @@ async function fetchCandidates() {
       var randomArtist = artistNames[Math.floor(Math.random() * artistNames.length)];
       var rId = await resolveArtistId(randomArtist);
       if (rId) {
-        var rTop = await spGet('/artists/' + rId + '/top-tracks?market=from_token');
+        var rTop = await spGet('/artists/' + rId + '/top-tracks?market=' + (userMarket || 'US'));
         if (rTop && rTop.tracks && rTop.tracks.length > 0) {
           var seedTrack = rTop.tracks[0];
           promises.push(expandFromTrack({ name: seedTrack.name, artist: seedTrack.artists[0].name }));

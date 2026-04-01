@@ -102,11 +102,11 @@ function formatTime(ms) {
 
 function highlightNowPlaying(uri) {
   // Remove previous highlight
-  var prev = document.querySelector('.track-card.now-playing');
+  var prev = document.querySelector('.track-item.now-playing');
   if (prev) prev.classList.remove('now-playing');
 
   if (!uri) return;
-  var card = document.querySelector('.track-card[data-uri="' + CSS.escape(uri) + '"]');
+  var card = document.querySelector('.track-item[data-uri="' + CSS.escape(uri) + '"]');
   if (card) card.classList.add('now-playing');
 }
 
@@ -192,7 +192,7 @@ function initPlayerControls() {
     }
     updatePlayerBarHeart();
     // Update card heart too
-    var card = document.querySelector('.track-card[data-uri="' + CSS.escape(currentTrack.uri) + '"]');
+    var card = document.querySelector('.track-item[data-uri="' + CSS.escape(currentTrack.uri) + '"]');
     if (card) {
       var cardHeart = card.querySelector('.card-heart-btn');
       if (cardHeart) {

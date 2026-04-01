@@ -51,6 +51,9 @@ var isPlaying = false;
 var likedSet = new Set();
 var pollTimer = null;
 
+// User profile
+var userMarket = null;
+
 // Token state
 var accessToken = localStorage.getItem('spotify_token') || null;
 var refreshToken = localStorage.getItem('spotify_refresh') || null;

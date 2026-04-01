@@ -1,37 +1,41 @@
 /* signal.fm -- ui.js
    Feed render, infinite scroll, signal toggles, badges, init() */
 
-// ---- Render track cards ----
+// ---- Render track rows (playlist-style) ----
 
 function renderTracks(tracks) {
   var feed = document.getElementById('feed');
+  var startIdx = sessionFeed.length - tracks.length;
+
   for (var i = 0; i < tracks.length; i++) {
     var t = tracks[i];
-    var card = document.createElement('div');
-    card.className = 'track-card';
-    card.setAttribute('data-uri', t.uri);
-    card.setAttribute('data-id', t.id);
+    var rowNum = startIdx + i + 1;
+    var row = document.createElement('div');
+    row.className = 'track-item';
+    row.setAttribute('data-uri', t.uri);
+    row.setAttribute('data-id', t.id);
 
     var badgeText = getBadgeText(t);
     var isLiked = likedSet.has(t.id);
 
-    card.innerHTML =
-      '<img class="track-card-art" src="' + escapeAttr(t.albumArt || '') + '" alt="" loading="lazy">' +
-      '<div class="track-card-body">' +
-        '<span class="track-card-name">' + escapeHtml(t.name) + '</span>' +
-        '<span class="track-card-artist">' + escapeHtml(t.artist) + '</span>' +
+    row.innerHTML =
+      '<div class="track-num-wrap">' +
+        '<span class="track-num">' + rowNum + '</span>' +
+        '<span class="track-play-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>' +
       '</div>' +
-      '<div class="track-card-footer">' +
-        '<span class="track-source-badge source-' + t._source + '">' + escapeHtml(badgeText) + '</span>' +
-        '<div class="track-card-actions">' +
-          '<button class="icon-btn card-heart-btn' + (isLiked ? ' liked' : '') + '" title="Like" data-id="' + escapeAttr(t.id) + '">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
-          '</button>' +
-        '</div>' +
-      '</div>';
+      '<img class="track-thumb" src="' + escapeAttr(t.albumArt || '') + '" alt="" loading="lazy">' +
+      '<div class="track-info">' +
+        '<div class="track-name">' + escapeHtml(t.name) + '</div>' +
+        '<div class="track-artist">' + escapeHtml(t.artist) + '</div>' +
+      '</div>' +
+      '<span class="track-source-badge source-' + t._source + '">' + escapeHtml(badgeText) + '</span>' +
+      '<span class="track-duration">' + formatDuration(t.duration) + '</span>' +
+      '<button class="card-heart-btn' + (isLiked ? ' liked' : '') + '" title="Like" data-id="' + escapeAttr(t.id) + '">' +
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="' + (isLiked ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
+      '</button>';
 
     // Click to play
-    card.addEventListener('click', (function(uri) {
+    row.addEventListener('click', (function(uri) {
       return function(e) {
         if (e.target.closest('.card-heart-btn')) return;
         playFromFeed(uri);
@@ -39,7 +43,7 @@ function renderTracks(tracks) {
     })(t.uri));
 
     // Heart button
-    var heartBtn = card.querySelector('.card-heart-btn');
+    var heartBtn = row.querySelector('.card-heart-btn');
     heartBtn.addEventListener('click', (function(track) {
       return function(e) {
         e.stopPropagation();
@@ -48,17 +52,27 @@ function renderTracks(tracks) {
         if (likedSet.has(id)) {
           unlikeTrack(id);
           btn.classList.remove('liked');
+          btn.querySelector('svg').setAttribute('fill', 'none');
         } else {
           likeTrack(id);
           onLike(track);
           btn.classList.add('liked');
+          btn.querySelector('svg').setAttribute('fill', 'currentColor');
         }
         updatePlayerBarHeart();
       };
     })(t));
 
-    feed.appendChild(card);
+    feed.appendChild(row);
   }
+}
+
+function formatDuration(ms) {
+  if (!ms) return '';
+  var s = Math.floor(ms / 1000);
+  var m = Math.floor(s / 60);
+  s = s % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
 }
 
 function getBadgeText(track) {
@@ -304,7 +318,7 @@ async function init() {
 
   // Show feed, hide loading
   document.getElementById('feed-loading').style.display = 'none';
-  document.getElementById('feed').style.display = 'grid';
+  document.getElementById('feed').style.display = 'block';
 
   // Load first batch
   await loadNextBatch();
