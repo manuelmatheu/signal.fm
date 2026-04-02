@@ -144,6 +144,7 @@ a:hover { text-decoration: underline; }
 }
 .btn-secondary { background: transparent; }
 .btn-small  { padding: 5px 10px; font-size: 0.78rem; }
+/* btn-large pairs with btn-primary for CTAs; all large buttons are pill-shaped by intent */
 .btn-large  { padding: 13px 30px; font-size: 0.92rem; border-radius: 100px; }
 
 .icon-btn {
