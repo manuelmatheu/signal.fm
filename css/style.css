@@ -6,40 +6,40 @@
 /* ---- Reset ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ---- Design tokens: Light (default) ---- */
+/* ---- Design tokens: Light (Pastel Neon) ---- */
 :root {
-  --bg:            #f6f4f1;
-  --bg-2:          #edebe6;
+  --bg:            #faf9ff;
+  --bg-2:          #f0ecff;
   --surface:       #ffffff;
-  --surface-2:     #f2efea;
-  --border:        #e8e4de;
-  --border-s:      #d4cfc9;
-  --fg:            #18181b;
-  --fg-2:          #6b6760;
-  --fg-3:          #b0aaa3;
+  --surface-2:     #ede8ff;
+  --border:        rgba(124, 58, 237, 0.08);
+  --border-s:      rgba(124, 58, 237, 0.16);
+  --fg:            #1a0d2e;
+  --fg-2:          #5a4875;
+  --fg-3:          #9b88b8;
 
   --accent:        #c55f38;
-  --accent-glow:   rgba(197, 95, 56, 0.2);
-  --accent-dim:    rgba(197, 95, 56, 0.1);
+  --accent-glow:   rgba(197, 95, 56, 0.20);
+  --accent-dim:    rgba(197, 95, 56, 0.10);
 
   --purple:        #7c3aed;
-  --purple-bg:     rgba(124, 58, 237, 0.1);
+  --purple-bg:     rgba(124, 58, 237, 0.10);
   --teal:          #059669;
-  --teal-bg:       rgba(5, 150, 105, 0.1);
-  --coral:         #e11d48;
-  --coral-bg:      rgba(225, 29, 72, 0.1);
+  --teal-bg:       rgba(5, 150, 105, 0.10);
+  --coral:         #e0185a;
+  --coral-bg:      rgba(224, 24, 90, 0.10);
 
-  --card-shadow:       0 2px 12px rgba(0,0,0,0.07);
-  --card-shadow-hover: 0 6px 28px rgba(0,0,0,0.13);
-  --input-bg:      #ede9e3;
+  --card-shadow:       0 2px 12px rgba(124, 58, 237, 0.07);
+  --card-shadow-hover: 0 6px 32px rgba(124, 58, 237, 0.12);
+  --input-bg:      #f5f2ff;
   --error-bg:      #fff1f2;
-  --hover:         rgba(0,0,0,0.04);
-  --hover-s:       rgba(0,0,0,0.07);
+  --hover:         rgba(0, 0, 0, 0.04);
+  --hover-s:       rgba(0, 0, 0, 0.07);
 
-  --header-bg:     rgba(246, 244, 241, 0.88);
-  --player-bg:     rgba(252, 250, 248, 0.92);
-  --player-border: rgba(0, 0, 0, 0.08);
-  --progress-bg:   #e0dbd4;
+  --header-bg:     rgba(250, 249, 255, 0.88);
+  --player-bg:     rgba(252, 250, 255, 0.92);
+  --player-border: rgba(124, 58, 237, 0.07);
+  --progress-bg:   #ddd8f0;
   --progress-fill: var(--accent);
 
   --radius-s: 6px;
