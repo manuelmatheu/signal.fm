@@ -334,10 +334,9 @@ a:hover { text-decoration: underline; }
   padding: 14px 16px;
   background: var(--surface);
   border-radius: var(--radius-m);
-  transition: border-color 150ms, background 150ms;
+  transition: background 150ms;
 }
 .signal-card:hover {
-  border-color: var(--border-s);
   background: var(--surface-2);
 }
 .signal-icon {
