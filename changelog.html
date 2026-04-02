@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog &mdash; signal.fm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;500;600;700;800&display=swap">
+  <script>
+    (function() {
+      var theme = localStorage.getItem('mixtape_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Changelog page overrides -- no ambient layer, clean reading view */
+    body::before { display: none; }
+    body { background: var(--bg); }
+
+    .cl-wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+    .cl-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--fg-3);
+      text-decoration: none;
+      margin-bottom: 36px;
+      transition: color 0.15s;
+    }
+    .cl-back:hover { color: var(--accent); text-decoration: none; }
+    /* Hide back link when loaded in iframe */
+    .in-iframe .cl-back { display: none; }
+
+    .cl-heading {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.2rem;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      color: var(--fg);
+      margin-bottom: 6px;
+    }
+    .cl-sub {
+      font-size: 0.85rem;
+      color: var(--fg-3);
+      margin-bottom: 48px;
+    }
+
+    .cl-entry {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 0 24px;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    /* Timeline line */
+    .cl-entry::before {
+      content: '';
+      position: absolute;
+      left: 36px;
+      top: 28px;
+      bottom: -40px;
+      width: 1px;
+      background: var(--border);
+    }
+    .cl-entry:last-child::before { display: none; }
+
+    .cl-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      padding-top: 3px;
+      gap: 8px;
+    }
+    .cl-version {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: var(--fg);
+      white-space: nowrap;
+    }
+    /* Timeline dot */
+    .cl-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-s);
+      flex-shrink: 0;
+      margin-right: -4px; /* align to timeline line center */
+      position: relative;
+      left: 4px;
+    }
+    .cl-dot.major { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+
+    .cl-body { padding-top: 2px; }
+    .cl-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .cl-date {
+      font-size: 0.72rem;
+      color: var(--fg-3);
+      font-variant-numeric: tabular-nums;
+    }
+    .cl-tag {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      border-radius: 100px;
+    }
+    .tag-major  { background: var(--accent-dim); color: var(--accent); }
+    .tag-feature { background: rgba(52,211,153,0.12); color: var(--teal); }
+    .tag-fix    { background: var(--purple-bg); color: var(--purple); }
+    .tag-launch { background: var(--accent-dim); color: var(--accent); }
+
+    .cl-desc {
+      font-size: 0.84rem;
+      color: var(--fg-2);
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    .cl-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .cl-list li {
+      font-size: 0.83rem;
+      color: var(--fg-2);
+      line-height: 1.55;
+      padding-left: 14px;
+      position: relative;
+    }
+    .cl-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--fg-3);
+    }
+    .cl-list li strong {
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    /* iframe mode: tighter padding */
+    .in-iframe .cl-wrap { padding-top: 24px; }
+  </style>
+</head>
+<body>
+  <script>
+    if (window.self !== window.top) document.body.classList.add('in-iframe');
+  </script>
+
+  <div class="cl-wrap">
+    <a href="./" class="cl-back">&#8592; Back to signal.fm</a>
+
+    <h1 class="cl-heading">Changelog</h1>
+    <p class="cl-sub">Version history for signal.fm</p>
+
+    <!-- v0.4 -->
+    <div class="cl-entry">
+      <div class="cl-meta">
+        <span class="cl-version">v0.4</span>
+        <span class="cl-dot major"></span>
+      </div>
+      <div class="cl-body">
+        <div class="cl-row">
+          <span class="cl-date">2026-04-02</span>
+          <span class="cl-tag tag-major">Major</span>
+        </div>
+        <ul class="cl-list">
+          <li><strong>Ambient background</strong> &mdash; album art of the playing track bleeds into the full app background, blurred and saturated, crossfading between tracks (1.4s transition)</li>
+          <li><strong>DM Serif Display</strong> &mdash; new display font for the logo, welcome headline, and feed context title; pairs with Manrope for body text</li>
+          <li><strong>Cinematic player bar</strong> &mdash; glow shadow when playing, album art grows with accent glow, play button breathes with a subtle pulse animation</li>
+          <li><strong>Now-playing indicator</strong> &mdash; accent left-border inset + album art glow on the active track row</li>
+          <li><strong>Welcome CTA pulse</strong> &mdash; connect button animates with a slow glow loop when idle</li>
+          <li><strong>Footer &amp; changelog</strong> &mdash; persistent footer with version link opening this page as an overlay</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v0.3 -->
+    <div class="cl-entry">
+      <div class="cl-meta">
+        <span class="cl-version">v0.3</span>
+        <span class="cl-dot major"></span>
+      </div>
+      <div class="cl-body">
+        <div class="cl-row">
+          <span class="cl-date">2026-04-01</span>
+          <span class="cl-tag tag-major">Major</span>
+        </div>
+        <ul class="cl-list">
+          <li><strong>Neon Pulse design system</strong> &mdash; deep purple void dark theme, pastel lavender light theme, warm orange accent throughout</li>
+          <li><strong>Manrope typography</strong> &mdash; replaced system fonts with Manrope 400&ndash;800</li>
+          <li><strong>Signal toggles</strong> &mdash; per-signal checkboxes for artist similarity, track similarity, new releases, and Last.fm picks</li>
+          <li><strong>Last.fm picks signal</strong> &mdash; personalized recommendations via Last.fm session auth (optional)</li>
+          <li><strong>Feed context panel</strong> &mdash; collapsible liner notes showing seeds, active signals, and narrative context</li>
+          <li><strong>Mobile hamburger drawer</strong> &mdash; sidebar becomes a slide-in drawer with backdrop on small screens</li>
+          <li><strong>Like / skip feedback loop</strong> &mdash; heart boosts artist weight +0.3; skip softens it &minus;0.2; feed adapts in real time</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v0.2 -->
+    <div class="cl-entry">
+      <div class="cl-meta">
+        <span class="cl-version">v0.2</span>
+        <span class="cl-dot"></span>
+      </div>
+      <div class="cl-body">
+        <div class="cl-row">
+          <span class="cl-date">2026-03-xx</span>
+          <span class="cl-tag tag-feature">Feature</span>
+        </div>
+        <ul class="cl-list">
+          <li><strong>All four signals</strong> &mdash; artist similarity, track similarity, new releases, and daily rotation feeding a single deduplicated candidate pool</li>
+          <li><strong>Infinite scroll</strong> &mdash; IntersectionObserver sentinel pre-generates the next batch while you listen</li>
+          <li><strong>Candidate buffer</strong> &mdash; next batch pre-built in the background to keep scroll seamless</li>
+          <li><strong>Artist ID cache</strong> &mdash; Last.fm artist names resolved to Spotify IDs and cached for 24h</li>
+          <li><strong>Save as Playlist</strong> &mdash; export the current session feed as a private Spotify playlist</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v0.1 -->
+    <div class="cl-entry">
+      <div class="cl-meta">
+        <span class="cl-version">v0.1</span>
+        <span class="cl-dot major"></span>
+      </div>
+      <div class="cl-body">
+        <div class="cl-row">
+          <span class="cl-date">2026-03-xx</span>
+          <span class="cl-tag tag-launch">Launch</span>
+        </div>
+        <p class="cl-desc">Initial build. Spotify PKCE OAuth, Web Playback SDK, seed pool from top artists, artist similarity signal via Last.fm, basic feed rendering and player bar.</p>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

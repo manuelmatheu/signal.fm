@@ -205,6 +205,21 @@
     </div>
   </div>
 
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div>Powered by <a href="https://www.last.fm/api" target="_blank">Last.fm API</a> &amp; <a href="https://developer.spotify.com/" target="_blank">Spotify Web API</a> &middot; Requires Spotify Premium</div>
+    <div>Built with &#10084; by Manuel Matheu with <a href="https://claude.ai" target="_blank">Claude</a> by Anthropic &middot; <a href="#" id="changelog-link">v0.4</a></div>
+  </footer>
+
+  <!-- Changelog overlay -->
+  <div class="changelog-overlay" id="changelog-overlay" style="display:none;">
+    <div class="changelog-overlay-header">
+      <span class="changelog-overlay-title">Changelog</span>
+      <button class="changelog-overlay-close" id="changelog-close">&#10005;</button>
+    </div>
+    <iframe id="changelog-frame" class="changelog-overlay-frame" src="about:blank"></iframe>
+  </div>
+
   <!-- Scripts: strict load order, no modules -->
   <script src="https://sdk.scdn.co/spotify-player.js"></script>
   <script src="js/config.js"></script>
@@ -213,5 +228,28 @@
   <script src="js/seeds.js"></script>
   <script src="js/player.js"></script>
   <script src="js/ui.js"></script>
+  <script>
+    (function() {
+      var link = document.getElementById('changelog-link');
+      var overlay = document.getElementById('changelog-overlay');
+      var close = document.getElementById('changelog-close');
+      var frame = document.getElementById('changelog-frame');
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        frame.src = 'changelog.html';
+        overlay.style.display = 'flex';
+      });
+      close.addEventListener('click', function() {
+        overlay.style.display = 'none';
+        frame.src = 'about:blank';
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && overlay.style.display !== 'none') {
+          overlay.style.display = 'none';
+          frame.src = 'about:blank';
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
