@@ -189,7 +189,6 @@ a:hover { text-decoration: underline; }
   justify-content: space-between;
   padding: 0 24px;
   height: 56px;
-  border-bottom: 1px solid var(--border);
   background: var(--header-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -221,7 +220,6 @@ a:hover { text-decoration: underline; }
   width: 256px;
   flex-shrink: 0;
   padding: 24px 20px;
-  border-right: 1px solid var(--border);
   overflow-y: auto;
   max-height: calc(100vh - 56px);
   position: sticky;
@@ -335,7 +333,6 @@ a:hover { text-decoration: underline; }
   gap: 14px;
   padding: 14px 16px;
   background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius-m);
   transition: border-color 150ms, background 150ms;
 }
@@ -376,7 +373,6 @@ a:hover { text-decoration: underline; }
 }
 
 .track-list {
-  border: 1px solid var(--border);
   border-radius: var(--radius-m);
   overflow: hidden;
 }
@@ -420,12 +416,10 @@ a:hover { text-decoration: underline; }
   align-items: center;
   gap: 12px;
   padding: 9px 14px;
-  border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: background 100ms;
   animation: rowIn 0.22s var(--ease-out) both;
 }
-.track-item:last-child { border-bottom: none; }
 .track-item:hover { background: var(--hover-s); }
 .track-item.now-playing { background: var(--accent-dim); }
 .track-item.now-playing .track-name { color: var(--accent); }
