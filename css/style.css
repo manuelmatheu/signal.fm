@@ -204,6 +204,7 @@ a:hover { text-decoration: underline; }
 }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .header-right { display: flex; align-items: center; gap: 6px; }
+.hamburger-btn { display: none; }
 
 .logo {
   font-size: 1.1rem;
@@ -414,6 +415,73 @@ a:hover { text-decoration: underline; }
   color: var(--fg-2);
   font-size: 0.85rem;
   line-height: 1.65;
+}
+
+/* ---- Sidebar backdrop (mobile drawer overlay) ---- */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 149;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+.sidebar-backdrop.active {
+  display: block;
+  opacity: 1;
+}
+
+/* ---- Feed context / liner notes ---- */
+.feed-context {
+  background: var(--surface);
+  border-radius: var(--radius-m);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.feed-context-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.feed-context-toggle:hover { background: var(--hover-s); }
+.feed-context-chevron { transition: transform 200ms var(--ease-out); flex-shrink: 0; }
+.feed-context.collapsed .feed-context-chevron { transform: rotate(-90deg); }
+.feed-context-body { padding: 0 16px 16px; }
+.feed-context.collapsed .feed-context-body { display: none; }
+.feed-context-narrative {
+  font-size: 0.82rem;
+  color: var(--fg-2);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.feed-context-seeds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.feed-context-seed-pill {
+  background: var(--purple-bg, rgba(139, 92, 246, 0.12));
+  color: var(--purple, #8b5cf6);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+.feed-context-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 /* ---- Track list (playlist-style rows) ---- */
@@ -686,7 +754,26 @@ a:hover { text-decoration: underline; }
 
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
-  .sidebar { display: none; }
+  .hamburger-btn { display: inline-flex; }
+  .sidebar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    max-height: none;
+    background: var(--bg);
+    z-index: 150;
+    transform: translateX(-100%);
+    transition: transform 250ms var(--ease-out);
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+  }
+  body.has-player .sidebar { bottom: 66px; }
   .main-layout { flex-direction: column; }
   .feed-container { padding: 10px; }
   .track-item { padding: 8px 12px; gap: 10px; }

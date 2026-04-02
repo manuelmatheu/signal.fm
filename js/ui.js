@@ -290,6 +290,118 @@ function updateSeedDisplay() {
   container.innerHTML = html;
 }
 
+// ---- Feed context / liner notes ----
+
+function renderFeedContext() {
+  var ctx = document.getElementById('feed-context');
+  if (!ctx || sessionFeed.length === 0) return;
+
+  // Top 5 seed artists by weight
+  var entries = Object.entries(seedPool.artists);
+  entries.sort(function(a, b) { return b[1] - a[1]; });
+  var topSeeds = entries.slice(0, 5);
+
+  // Count tracks by source
+  var counts = {};
+  for (var i = 0; i < sessionFeed.length; i++) {
+    var src = sessionFeed[i]._source || 'unknown';
+    counts[src] = (counts[src] || 0) + 1;
+  }
+
+  // Active signals
+  var activeSignals = [];
+  if (signalWeights.artistSimilar) activeSignals.push('artist similarity');
+  if (signalWeights.trackSimilar) activeSignals.push('track similarity');
+  if (signalWeights.newReleases) activeSignals.push('new releases');
+  if (signalWeights.lfmRecommended) activeSignals.push('Last.fm picks');
+
+  // Narrative
+  var seedNames = topSeeds.slice(0, 3).map(function(e) { return e[0]; });
+  var narrative = 'Your feed is shaped by ' + activeSignals.length +
+    ' signal' + (activeSignals.length !== 1 ? 's' : '') +
+    (seedNames.length > 0 ? ', seeded from artists like ' + seedNames.join(', ') : '') + '.';
+  document.getElementById('feed-context-narrative').textContent = narrative;
+
+  // Seed pills
+  var seedsHtml = '';
+  for (var s = 0; s < topSeeds.length; s++) {
+    seedsHtml += '<span class="feed-context-seed-pill">' + escapeHtml(topSeeds[s][0]) + '</span>';
+  }
+  document.getElementById('feed-context-seeds').innerHTML = seedsHtml;
+
+  // Signal breakdown
+  var sourceLabels = {
+    artist_similar: { label: 'Similar artists', cls: 'source-artist_similar' },
+    track_similar:  { label: 'Similar tracks',  cls: 'source-track_similar' },
+    new_release:    { label: 'New releases',    cls: 'source-new_release' },
+    lfm_recommended:{ label: 'Last.fm picks',   cls: 'source-lfm_recommended' }
+  };
+  var signalsHtml = '';
+  for (var key in counts) {
+    var info = sourceLabels[key] || { label: key, cls: '' };
+    signalsHtml += '<span class="track-source-badge ' + info.cls + '">' +
+      escapeHtml(info.label) + ': ' + counts[key] + '</span>';
+  }
+  document.getElementById('feed-context-signals').innerHTML = signalsHtml;
+
+  ctx.style.display = 'block';
+
+  document.getElementById('feed-context-toggle').addEventListener('click', function() {
+    ctx.classList.toggle('collapsed');
+  });
+}
+
+// ---- Autoplay first track ----
+
+function autoplayFirstTrack() {
+  if (sessionFeed.length === 0) return;
+  var uri = sessionFeed[0].uri;
+
+  if (sdkReady) {
+    playFromFeed(uri);
+    return;
+  }
+
+  // Wait up to 3s for SDK, then play anyway via remote fallback
+  var attempts = 0;
+  var check = setInterval(function() {
+    attempts++;
+    if (sdkReady || attempts >= 6) {
+      clearInterval(check);
+      playFromFeed(uri);
+    }
+  }, 500);
+}
+
+// ---- Hamburger menu (mobile drawer) ----
+
+function initHamburgerMenu() {
+  var btn = document.getElementById('hamburger-btn');
+  var sidebar = document.getElementById('sidebar');
+  var backdrop = document.getElementById('sidebar-backdrop');
+  if (!btn || !sidebar || !backdrop) return;
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    backdrop.classList.add('active');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('active');
+  }
+
+  btn.addEventListener('click', function() {
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  backdrop.addEventListener('click', closeSidebar);
+}
+
 // ---- Theme toggle ----
 
 function initTheme() {
@@ -333,6 +445,7 @@ async function init() {
   initLfmAuth();
   initSignalToggles();
   initPlayerControls();
+  initHamburgerMenu();
 
   // Handle OAuth callback
   var justConnected = await handleCallback();
@@ -380,6 +493,12 @@ async function init() {
 
   // Load first batch
   await loadNextBatch();
+
+  // Show feed context
+  renderFeedContext();
+
+  // Autoplay first track
+  autoplayFirstTrack();
 
   // Start infinite scroll
   initInfiniteScroll();
