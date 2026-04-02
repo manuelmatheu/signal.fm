@@ -135,6 +135,7 @@ a:hover { text-decoration: underline; }
   background: var(--accent);
   color: #fff;
   border-color: transparent;
+  border-radius: 100px;
 }
 .btn-primary:hover {
   opacity: 0.88;
@@ -143,7 +144,7 @@ a:hover { text-decoration: underline; }
 }
 .btn-secondary { background: transparent; }
 .btn-small  { padding: 5px 10px; font-size: 0.78rem; }
-.btn-large  { padding: 13px 30px; font-size: 0.92rem; border-radius: var(--radius-m); }
+.btn-large  { padding: 13px 30px; font-size: 0.92rem; border-radius: 100px; }
 
 .icon-btn {
   display: inline-flex;
