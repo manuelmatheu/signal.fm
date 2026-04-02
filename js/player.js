@@ -1,6 +1,30 @@
 /* signal.fm -- player.js
    SDK events, polling fallback, player bar UI, liked songs */
 
+// ---- Ambient background -- cinematic album art atmosphere ----
+
+var _ambientUseA = true;
+var _ambientLastUrl = '';
+
+function updateAmbientBackground(artUrl) {
+  if (!artUrl || artUrl === _ambientLastUrl) return;
+  _ambientLastUrl = artUrl;
+
+  var imgA = document.getElementById('ambient-img-a');
+  var imgB = document.getElementById('ambient-img-b');
+  if (!imgA || !imgB) return;
+
+  var target = _ambientUseA ? imgA : imgB;
+  var other  = _ambientUseA ? imgB : imgA;
+
+  target.onload = function() {
+    target.classList.add('active');
+    other.classList.remove('active');
+  };
+  target.src = artUrl;
+  _ambientUseA = !_ambientUseA;
+}
+
 // ---- SDK state change handler ----
 
 function onSDKStateChange(state) {
@@ -60,6 +84,14 @@ function updatePlayerBar() {
   document.getElementById('player-art').src = currentTrack.albumArt;
   document.getElementById('player-track-name').textContent = currentTrack.name;
   document.getElementById('player-artist-name').textContent = currentTrack.artist;
+
+  // Cinematic ambient background
+  updateAmbientBackground(currentTrack.albumArt);
+  if (isPlaying) {
+    bar.classList.add('is-playing');
+  } else {
+    bar.classList.remove('is-playing');
+  }
 
   // Play/pause icons
   var playIcon = document.querySelector('#player-play .icon-play');

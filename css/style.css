@@ -1,10 +1,48 @@
 /* signal.fm -- style.css v2
    Design system: Neon Pulse, Manrope, cinematic music-forward */
 
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 /* ---- Reset ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ---- Ambient background -- crossfading album art atmosphere ---- */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ambient-img {
+  position: absolute;
+  inset: -80px;
+  width: calc(100% + 160px);
+  height: calc(100% + 160px);
+  object-fit: cover;
+  filter: blur(80px) saturate(1.8);
+  opacity: 0;
+  transition: opacity 1.4s ease;
+  transform: scale(1.1);
+}
+.ambient-img.active { opacity: 0.35; }
+[data-theme="light"] .ambient-img.active { opacity: 0.20; }
+
+/* Gradient overlay for readability */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, var(--bg) 0%, transparent 18%, transparent 72%, var(--bg) 100%),
+    radial-gradient(ellipse at 50% 38%, transparent 0%, rgba(0,0,0,0.25) 100%);
+  pointer-events: none;
+}
+[data-theme="light"] body::before {
+  background:
+    linear-gradient(180deg, var(--bg) 0%, transparent 18%, transparent 72%, var(--bg) 100%);
+}
 
 /* ---- Design tokens: Light (Pastel Neon) ---- */
 :root {
@@ -207,9 +245,10 @@ a:hover { text-decoration: underline; }
 .hamburger-btn { display: none; }
 
 .logo {
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: -0.05em;
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
   color: var(--fg);
 }
 .logo-dot { color: var(--accent); }
@@ -317,10 +356,11 @@ a:hover { text-decoration: underline; }
   max-width: 460px;
 }
 .welcome-content h2 {
-  font-size: 1.9rem;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.15;
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.8rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
   margin-bottom: 14px;
 }
 .welcome-content > p {
@@ -449,9 +489,9 @@ a:hover { text-decoration: underline; }
   background: none;
   cursor: pointer;
   color: var(--fg);
-  font-family: inherit;
-  font-size: 0.84rem;
-  font-weight: 600;
+  font-family: 'DM Serif Display', serif;
+  font-size: 1rem;
+  font-weight: 400;
 }
 .feed-context-toggle:hover { background: var(--hover-s); }
 .feed-context-chevron { transition: transform 200ms var(--ease-out); flex-shrink: 0; }
@@ -495,9 +535,10 @@ a:hover { text-decoration: underline; }
   transition: background 100ms;
   animation: rowIn 0.22s var(--ease-out) both;
 }
-.track-item:hover { background: var(--hover-s); }
-.track-item.now-playing { background: var(--accent-dim); }
+.track-item:hover { background: var(--hover-s); transform: translateX(2px); }
+.track-item.now-playing { background: var(--accent-dim); box-shadow: inset 3px 0 0 var(--accent); }
 .track-item.now-playing .track-name { color: var(--accent); }
+.track-item.now-playing .track-thumb { box-shadow: 0 0 14px var(--accent-glow); }
 @keyframes rowIn {
   from { opacity: 0; transform: translateX(-6px); }
   to   { opacity: 1; transform: translateX(0); }
@@ -617,13 +658,17 @@ a:hover { text-decoration: underline; }
   height: 80px;
   background: var(--player-bg);
   border-top: 1px solid var(--player-border);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
   display: flex;
   align-items: center;
   padding: 0 20px;
   gap: 16px;
   z-index: 200;
+  transition: box-shadow 0.6s ease;
+}
+.player-bar.is-playing {
+  box-shadow: 0 -4px 40px var(--accent-dim), 0 0 80px rgba(232,112,64,0.06);
 }
 
 .player-track-info {
@@ -641,6 +686,13 @@ a:hover { text-decoration: underline; }
   background: var(--surface-2);
   box-shadow: 0 2px 12px rgba(0,0,0,0.35);
   flex-shrink: 0;
+  transition: width 0.4s ease, height 0.4s ease, box-shadow 0.4s ease, border-radius 0.4s ease;
+}
+.player-bar.is-playing .player-art {
+  width: 58px;
+  height: 58px;
+  border-radius: 8px;
+  box-shadow: 0 0 20px var(--accent-glow), 0 4px 20px rgba(0,0,0,0.4);
 }
 .player-text {
   display: flex;
@@ -684,6 +736,13 @@ a:hover { text-decoration: underline; }
   opacity: 0.88;
   box-shadow: 0 0 20px var(--accent-glow);
   transform: scale(1.06);
+}
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 8px var(--accent-glow); }
+  50%       { box-shadow: 0 0 22px var(--accent-glow), 0 0 44px rgba(232,112,64,0.1); }
+}
+.player-bar.is-playing .player-play-btn {
+  animation: breathe 3s ease-in-out infinite;
 }
 
 .player-progress-wrap {
@@ -752,6 +811,15 @@ a:hover { text-decoration: underline; }
   border: none;
 }
 
+/* ---- Welcome CTA pulse ---- */
+@keyframes cta-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50%       { box-shadow: 0 0 28px 6px var(--accent-glow); }
+}
+#welcome-connect-btn {
+  animation: cta-pulse 2.8s ease-in-out infinite;
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
   .hamburger-btn { display: inline-flex; }
@@ -788,11 +856,14 @@ a:hover { text-decoration: underline; }
   }
   .player-track-info { min-width: 120px; max-width: 160px; }
   .player-art { width: 42px; height: 42px; }
+  .player-bar.is-playing .player-art { width: 48px; height: 48px; }
+  .ambient-img { filter: blur(60px) saturate(1.6); }
+  .ambient-img.active { opacity: 0.28; }
   .player-volume-wrap { display: none; }
   .player-progress-wrap { display: none; }
   body.has-player { padding-bottom: 74px; }
   .app-header { padding: 0 16px; }
-  .welcome-content h2 { font-size: 1.55rem; }
+  .welcome-content h2 { font-size: 2rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
