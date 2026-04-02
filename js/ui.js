@@ -83,6 +83,8 @@ function getBadgeText(track) {
       return track._sourceDetail ? 'Because you liked ' + track._sourceDetail : 'Similar track';
     case 'new_release':
       return 'New release';
+    case 'lfm_recommended':
+      return 'Last.fm picks';
     default:
       return 'Discovered';
   }
@@ -201,6 +203,47 @@ function initSignalToggles() {
     signalWeights.newReleases = e.target.checked;
     candidateBuffer = [];
   });
+  var lfmRecToggle = document.getElementById('toggle-lfm-recommended');
+  if (lfmRecToggle) {
+    lfmRecToggle.addEventListener('change', function(e) {
+      signalWeights.lfmRecommended = e.target.checked;
+      candidateBuffer = [];
+    });
+  }
+}
+
+// ---- Last.fm auth connect/disconnect ----
+
+function initLfmAuth() {
+  var btn = document.getElementById('lfm-connect-btn');
+  var statusEl = document.getElementById('lfm-rec-status');
+  var toggleRow = document.getElementById('toggle-row-lfm-recommended');
+  if (!btn) return;
+
+  function setConnected() {
+    btn.textContent = 'Disconnect';
+    statusEl.textContent = 'Personalized picks enabled';
+    if (toggleRow) toggleRow.style.display = '';
+  }
+
+  function setDisconnected() {
+    btn.textContent = 'Connect Last.fm';
+    statusEl.textContent = 'Connect for personalized recommendations';
+    if (toggleRow) toggleRow.style.display = 'none';
+  }
+
+  if (LFM_SESSION_KEY) {
+    setConnected();
+    btn.addEventListener('click', function() {
+      LFM_SESSION_KEY = null;
+      localStorage.removeItem('signal_lfm_session');
+      candidateBuffer = [];
+      setDisconnected();
+    });
+  } else {
+    setDisconnected();
+    btn.addEventListener('click', startLfmAuth);
+  }
 }
 
 // ---- Last.fm username ----
@@ -262,6 +305,16 @@ function initTheme() {
 
 async function handleCallback() {
   var params = new URLSearchParams(window.location.search);
+
+  // Last.fm auth callback
+  var lfmToken = params.get('token');
+  if (lfmToken && !params.get('code')) {
+    await exchangeLfmToken(lfmToken);
+    window.history.replaceState({}, '', window.location.pathname);
+    return false; // not a Spotify connect
+  }
+
+  // Spotify OAuth callback
   var code = params.get('code');
   if (code) {
     var ok = await exchangeCode(code);
@@ -277,6 +330,7 @@ async function handleCallback() {
 async function init() {
   initTheme();
   initLastfm();
+  initLfmAuth();
   initSignalToggles();
   initPlayerControls();
 
@@ -315,6 +369,10 @@ async function init() {
   }
 
   updateSeedDisplay();
+
+  // Pre-seed heardUris with library tracks so they are excluded from the feed
+  var libraryUris = await fetchSavedTracks(500);
+  for (var li = 0; li < libraryUris.length; li++) heardUris.add(libraryUris[li]);
 
   // Show feed, hide loading
   document.getElementById('feed-loading').style.display = 'none';
