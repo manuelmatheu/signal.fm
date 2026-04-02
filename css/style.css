@@ -50,40 +50,40 @@
   --ease-in-out:   cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
-/* ---- Design tokens: Dark ---- */
+/* ---- Design tokens: Dark (Neon Pulse) ---- */
 [data-theme="dark"] {
-  --bg:            #080808;
-  --bg-2:          #0e0e0e;
-  --surface:       #141414;
-  --surface-2:     #1c1c1c;
-  --border:        #1e1e1e;
-  --border-s:      #2c2c2c;
-  --fg:            #f0ece8;
-  --fg-2:          #807870;
-  --fg-3:          #484038;
+  --bg:            #16052a;
+  --bg-2:          #1c0b35;
+  --surface:       #21103d;
+  --surface-2:     #2a1850;
+  --border:        rgba(185, 162, 208, 0.10);
+  --border-s:      rgba(185, 162, 208, 0.20);
+  --fg:            #e8e0f5;
+  --fg-2:          #b9a2d0;
+  --fg-3:          #7a6490;
 
   --accent:        #e87040;
   --accent-glow:   rgba(232, 112, 64, 0.28);
   --accent-dim:    rgba(232, 112, 64, 0.14);
 
-  --purple:        #c084fc;
-  --purple-bg:     rgba(192, 132, 252, 0.12);
+  --purple:        #b6a0ff;
+  --purple-bg:     rgba(182, 160, 255, 0.12);
   --teal:          #34d399;
   --teal-bg:       rgba(52, 211, 153, 0.12);
-  --coral:         #fb7185;
-  --coral-bg:      rgba(251, 113, 133, 0.12);
+  --coral:         #ff6c95;
+  --coral-bg:      rgba(255, 108, 149, 0.12);
 
-  --card-shadow:       0 4px 24px rgba(0,0,0,0.56);
-  --card-shadow-hover: 0 10px 48px rgba(0,0,0,0.76);
-  --input-bg:      #181818;
+  --card-shadow:       0 4px 24px rgba(0, 0, 0, 0.56);
+  --card-shadow-hover: 0 8px 64px rgba(182, 160, 255, 0.08);
+  --input-bg:      #120440;
   --error-bg:      #1a0a0a;
-  --hover:         rgba(255,255,255,0.04);
-  --hover-s:       rgba(255,255,255,0.07);
+  --hover:         rgba(255, 255, 255, 0.04);
+  --hover-s:       rgba(255, 255, 255, 0.07);
 
-  --header-bg:     rgba(8, 8, 8, 0.88);
-  --player-bg:     rgba(10, 10, 10, 0.88);
-  --player-border: rgba(255, 255, 255, 0.07);
-  --progress-bg:   #282828;
+  --header-bg:     rgba(22, 5, 42, 0.88);
+  --player-bg:     rgba(22, 5, 42, 0.92);
+  --player-border: rgba(182, 160, 255, 0.10);
+  --progress-bg:   #3a2060;
   --progress-fill: var(--accent);
 }
 
