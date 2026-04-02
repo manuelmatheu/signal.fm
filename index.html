@@ -56,6 +56,11 @@
           <span class="toggle-label">New releases</span>
           <span class="badge badge-coral">Spotify</span>
         </label>
+        <label class="toggle-row" id="toggle-row-lfm-recommended" style="display:none;">
+          <input type="checkbox" id="toggle-lfm-recommended" checked>
+          <span class="toggle-label">Last.fm picks</span>
+          <span class="badge badge-gold">Last.fm</span>
+        </label>
       </div>
       <div class="sidebar-section">
         <h3 class="sidebar-title">Last.fm (optional)</h3>
@@ -64,6 +69,10 @@
           <button id="lfm-save-btn" class="btn btn-small">Save</button>
         </div>
         <p class="sidebar-hint" id="lfm-status">Adds scrobble history to your seed pool</p>
+        <div class="lfm-auth-row">
+          <button id="lfm-connect-btn" class="btn btn-small">Connect Last.fm</button>
+          <span class="sidebar-hint" id="lfm-rec-status">Connect for personalized recommendations</span>
+        </div>
       </div>
       <div class="sidebar-section">
         <h3 class="sidebar-title">Seed Artists</h3>

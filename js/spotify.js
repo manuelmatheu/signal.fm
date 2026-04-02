@@ -331,6 +331,29 @@ async function unlikeTrack(trackId) {
   likedSet.delete(trackId);
 }
 
+// ---- Fetch saved (liked) tracks for feed exclusion ----
+
+async function fetchSavedTracks(maxTracks) {
+  maxTracks = maxTracks || 500;
+  var uris = [];
+  var url = '/me/tracks?limit=50';
+  while (url && uris.length < maxTracks) {
+    var data = await spGet(url);
+    if (!data || !data.items) break;
+    for (var i = 0; i < data.items.length; i++) {
+      if (data.items[i].track && data.items[i].track.uri) {
+        uris.push(data.items[i].track.uri);
+      }
+    }
+    if (data.next) {
+      url = data.next.replace('https://api.spotify.com/v1', '');
+    } else {
+      url = null;
+    }
+  }
+  return uris;
+}
+
 async function checkLikedTracks(trackIds) {
   if (trackIds.length === 0) return;
   for (var i = 0; i < trackIds.length; i += 50) {

@@ -250,6 +250,16 @@ async function fetchCandidates() {
     promises.push(getNewReleasesForSeeds());
   }
 
+  // Last.fm personalized recommendations (requires Last.fm session key)
+  if (signalWeights.lfmRecommended && LFM_SESSION_KEY) {
+    promises.push((async function() {
+      var recs = await getLfmRecommendedTracks(50);
+      return recs.map(function(t) {
+        return { name: t.name, artist: t.artist, mbid: t.mbid || null, _source: 'lfm_recommended', _sourceDetail: null };
+      });
+    })());
+  }
+
   var results = await Promise.all(promises);
   for (var r = 0; r < results.length; r++) {
     if (results[r]) all = all.concat(results[r]);

@@ -15,6 +15,8 @@ var SCOPES = [
 
 // Last.fm
 var LFM_KEY = '177b9e8ee70fe2325bfff606cfdaee23';
+var LFM_SECRET = 'YOUR_LFM_SECRET_HERE'; // replace with your Last.fm API secret from last.fm/api/accounts
+var LFM_SESSION_KEY = localStorage.getItem('signal_lfm_session') || null;
 
 // Seed pool -- weighted map of artists and tracks driving all four signals
 var seedPool = {
@@ -24,9 +26,10 @@ var seedPool = {
 
 // Signal toggles
 var signalWeights = {
-  artistSimilar: true,
-  trackSimilar:  true,
-  newReleases:   true
+  artistSimilar:   true,
+  trackSimilar:    true,
+  newReleases:     true,
+  lfmRecommended:  true
 };
 
 // Constants
