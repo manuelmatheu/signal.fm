@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check js/spotify.js)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(node --check js/ui.js)",
+      "Bash(node --check js/player.js)",
+      "Bash(node --check js/config.js)",
+      "Bash(node --check js/seeds.js)",
+      "Bash(node --check js/lastfm.js)",
+      "Bash(curl -s https://api.github.com/repos/manuelmatheu/spotimix/git/trees/HEAD?recursive=1)",
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(item[''''path'''']\\) for item in data.get\\(''''tree'''',[]\\) if item[''''type'''']==''''blob'''']\")",
+      "Bash(gh api:*)"
+    ]
+  }
+}

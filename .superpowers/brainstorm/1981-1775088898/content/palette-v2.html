@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Palette v2 — Warm Orange on Purple</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: #0f0f13;
+      color: #e8e0f5;
+      padding: 32px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 6px; color: #e8e0f5; }
+    .subtitle { font-size: 0.82rem; color: #7a6490; margin-bottom: 40px; }
+
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+
+    .panel-label {
+      font-size: 0.67rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+    .panel-label.dark { color: #b6a0ff; }
+    .panel-label.light { color: #7c3aed; }
+
+    .dark-preview {
+      background: #16052a;
+      border-radius: 16px;
+      padding: 24px;
+      overflow: hidden;
+    }
+    .light-preview {
+      background: #faf9ff;
+      border-radius: 16px;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .swatch-row { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .swatch { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .swatch-block { width: 48px; height: 36px; border-radius: 8px; }
+    .swatch-name { font-size: 0.6rem; font-weight: 600; }
+
+    .dark-preview .swatch-name { color: #7a6490; }
+    .s-bg      { background: #16052a; border: 1px solid rgba(185,162,208,0.15); }
+    .s-surface { background: #21103d; }
+    .s-surface2{ background: #2a1850; }
+    .s-accent  { background: #e87040; }           /* warm orange */
+    .s-purple  { background: #b6a0ff; }
+    .s-coral   { background: #ff6c95; }
+    .s-teal    { background: #34d399; }
+    .s-fg      { background: #e8e0f5; }
+    .s-fg2     { background: #b9a2d0; }
+
+    .sl-bg      { background: #faf9ff; border: 1px solid rgba(124,58,237,0.12); }
+    .sl-surface { background: #ffffff; border: 1px solid rgba(124,58,237,0.08); }
+    .sl-surface2{ background: #ede8ff; }
+    .sl-accent  { background: #c55f38; }           /* warm orange light */
+    .sl-purple  { background: #7c3aed; }
+    .sl-coral   { background: #e0185a; }
+    .sl-teal    { background: #059669; }
+    .sl-fg      { background: #1a0d2e; }
+    .sl-fg2     { background: #5a4875; }
+
+    .mock-title {
+      font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em;
+      font-weight: 700; margin-bottom: 12px;
+    }
+    .dark-preview .mock-title { color: #7a6490; }
+    .light-preview .mock-title { color: #9b88b8; }
+
+    /* ---- DARK MOCK ---- */
+    .dark-header {
+      background: rgba(22,5,42,0.88);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(182,160,255,0.08);
+      padding: 10px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-radius: 10px 10px 0 0;
+    }
+    .dark-logo { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.05em; color: #e8e0f5; }
+    .dark-logo span { color: #e87040; }
+    .dark-connect-btn {
+      background: #e87040; color: #fff;
+      border: none; border-radius: 100px;
+      padding: 5px 14px; font-size: 0.72rem; font-weight: 700;
+      font-family: 'Manrope', sans-serif; cursor: pointer;
+    }
+    .dark-feed { background: #21103d; border-radius: 0 0 10px 10px; }
+    .dark-track {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px;
+    }
+    .dark-track + .dark-track { background: rgba(255,255,255,0.02); }
+    .dark-track-num { font-size: 0.68rem; color: #7a6490; width: 16px; text-align: right; flex-shrink: 0; }
+    .dark-thumb { width: 34px; height: 34px; border-radius: 4px; flex-shrink: 0; }
+    .dt-1 { background: linear-gradient(135deg, #b6a0ff, #6040d0); }
+    .dt-2 { background: linear-gradient(135deg, #e87040, #c04820); }
+    .dt-3 { background: linear-gradient(135deg, #ff6c95, #aa2255); }
+    .dark-track-info { flex: 1; min-width: 0; }
+    .dark-track-name { font-size: 0.82rem; font-weight: 600; color: #e8e0f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dark-track-name.now { color: #e87040; }
+    .dark-track-artist { font-size: 0.72rem; color: #b9a2d0; margin-top: 1px; }
+    .dark-badge { font-size: 0.58rem; padding: 2px 7px; border-radius: 100px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; flex-shrink: 0; }
+    .db-purple { background: rgba(182,160,255,0.12); color: #b6a0ff; }
+    .db-teal   { background: rgba(52,211,153,0.12);  color: #34d399; }
+    .db-coral  { background: rgba(255,108,149,0.12); color: #ff6c95; }
+    .dark-duration { font-size: 0.68rem; color: #7a6490; flex-shrink: 0; }
+
+    .dark-player {
+      margin-top: 12px;
+      background: rgba(22,5,42,0.92);
+      backdrop-filter: blur(24px);
+      border-top: 1px solid rgba(182,160,255,0.10);
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .dark-player-art {
+      width: 38px; height: 38px; border-radius: 6px; flex-shrink: 0;
+      background: linear-gradient(135deg, #e87040, #c04820);
+      box-shadow: 0 0 24px rgba(232,112,64,0.35);
+    }
+    .dark-player-info { flex: 1; min-width: 0; }
+    .dark-player-name { font-size: 0.78rem; font-weight: 700; color: #e8e0f5; }
+    .dark-player-artist { font-size: 0.68rem; color: #b9a2d0; }
+    .dark-play-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #e87040; border: none; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 20px rgba(232,112,64,0.45);
+    }
+    .dark-play-btn svg { fill: #fff; }
+    .dark-progress-wrap { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .dark-progress-bar { height: 3px; background: #3a2060; border-radius: 3px; overflow: hidden; }
+    .dark-progress-fill { height: 100%; width: 42%; background: #e87040; border-radius: 3px; }
+    .dark-times { display: flex; justify-content: space-between; }
+    .dark-time { font-size: 0.6rem; color: #7a6490; }
+
+    /* ---- LIGHT MOCK ---- */
+    .light-header {
+      background: rgba(250,249,255,0.88);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(124,58,237,0.07);
+      padding: 10px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-radius: 10px 10px 0 0;
+    }
+    .light-logo { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.05em; color: #1a0d2e; }
+    .light-logo span { color: #c55f38; }
+    .light-connect-btn {
+      background: #c55f38; color: #fff;
+      border: none; border-radius: 100px;
+      padding: 5px 14px; font-size: 0.72rem; font-weight: 700;
+      font-family: 'Manrope', sans-serif; cursor: pointer;
+    }
+    .light-feed { background: #ffffff; border-radius: 0 0 10px 10px; }
+    .light-track { display: flex; align-items: center; gap: 10px; padding: 9px 14px; }
+    .light-track + .light-track { background: rgba(124,58,237,0.02); }
+    .light-track-num { font-size: 0.68rem; color: #9b88b8; width: 16px; text-align: right; flex-shrink: 0; }
+    .light-thumb { width: 34px; height: 34px; border-radius: 4px; flex-shrink: 0; }
+    .lt-1 { background: linear-gradient(135deg, #b6a0ff, #7c3aed); }
+    .lt-2 { background: linear-gradient(135deg, #e87040, #c55f38); }
+    .lt-3 { background: linear-gradient(135deg, #ff6c95, #e0185a); }
+    .light-track-info { flex: 1; min-width: 0; }
+    .light-track-name { font-size: 0.82rem; font-weight: 600; color: #1a0d2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .light-track-name.now { color: #c55f38; }
+    .light-track-artist { font-size: 0.72rem; color: #5a4875; margin-top: 1px; }
+    .light-badge { font-size: 0.58rem; padding: 2px 7px; border-radius: 100px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; flex-shrink: 0; }
+    .lb-purple { background: rgba(124,58,237,0.10); color: #7c3aed; }
+    .lb-teal   { background: rgba(5,150,105,0.10);  color: #059669; }
+    .lb-coral  { background: rgba(224,24,90,0.10);  color: #e0185a; }
+    .light-duration { font-size: 0.68rem; color: #9b88b8; flex-shrink: 0; }
+
+    .light-player {
+      margin-top: 12px;
+      background: rgba(252,250,255,0.92);
+      backdrop-filter: blur(24px);
+      border-top: 1px solid rgba(124,58,237,0.07);
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .light-player-art {
+      width: 38px; height: 38px; border-radius: 6px; flex-shrink: 0;
+      background: linear-gradient(135deg, #e87040, #c55f38);
+      box-shadow: 0 4px 16px rgba(197,95,56,0.3);
+    }
+    .light-player-info { flex: 1; min-width: 0; }
+    .light-player-name { font-size: 0.78rem; font-weight: 700; color: #1a0d2e; }
+    .light-player-artist { font-size: 0.68rem; color: #5a4875; }
+    .light-play-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #c55f38; border: none; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(197,95,56,0.35);
+    }
+    .light-play-btn svg { fill: #fff; }
+    .light-progress-wrap { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .light-progress-bar { height: 3px; background: #ddd8f0; border-radius: 3px; overflow: hidden; }
+    .light-progress-fill { height: 100%; width: 42%; background: #c55f38; border-radius: 3px; }
+    .light-times { display: flex; justify-content: space-between; }
+    .light-time { font-size: 0.6rem; color: #9b88b8; }
+
+    .note {
+      font-size: 0.72rem; color: #7a6490; margin-top: 28px;
+      padding: 12px 16px;
+      background: rgba(232,112,64,0.06);
+      border-left: 3px solid rgba(232,112,64,0.35);
+      border-radius: 4px; line-height: 1.55;
+    }
+    .note strong { color: #b9a2d0; }
+
+    @media (max-width: 700px) { .split { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>Color palette v2 — Warm Orange on Purple</h1>
+  <p class="subtitle">Dark: deep purple void + warm orange CTAs &nbsp;/&nbsp; Light: pastel lavender + warm orange</p>
+
+  <div class="split">
+
+    <!-- DARK -->
+    <div>
+      <div class="panel-label dark">Dark mode</div>
+      <div class="dark-preview">
+        <div class="swatch-row">
+          <div class="swatch"><div class="swatch-block s-bg"></div><span class="swatch-name">BG #16052a</span></div>
+          <div class="swatch"><div class="swatch-block s-surface"></div><span class="swatch-name">Surface</span></div>
+          <div class="swatch"><div class="swatch-block s-surface2"></div><span class="swatch-name">Hover</span></div>
+          <div class="swatch"><div class="swatch-block s-fg"></div><span class="swatch-name">FG</span></div>
+          <div class="swatch"><div class="swatch-block s-fg2"></div><span class="swatch-name">FG-2</span></div>
+          <div class="swatch"><div class="swatch-block s-accent"></div><span class="swatch-name">Orange</span></div>
+          <div class="swatch"><div class="swatch-block s-purple"></div><span class="swatch-name">Purple</span></div>
+          <div class="swatch"><div class="swatch-block s-coral"></div><span class="swatch-name">Coral</span></div>
+          <div class="swatch"><div class="swatch-block s-teal"></div><span class="swatch-name">Teal</span></div>
+        </div>
+        <div class="mock-title">App preview</div>
+        <div class="dark-header">
+          <div class="dark-logo">signal<span>.fm</span></div>
+          <button class="dark-connect-btn">Connect Spotify</button>
+        </div>
+        <div class="dark-feed">
+          <div class="dark-track">
+            <div class="dark-track-num">1</div>
+            <div class="dark-thumb dt-1"></div>
+            <div class="dark-track-info">
+              <div class="dark-track-name">Motion Picture Soundtrack</div>
+              <div class="dark-track-artist">Radiohead</div>
+            </div>
+            <div class="dark-badge db-purple">Similar artist</div>
+            <div class="dark-duration">4:12</div>
+          </div>
+          <div class="dark-track">
+            <div class="dark-track-num">2</div>
+            <div class="dark-thumb dt-2"></div>
+            <div class="dark-track-info">
+              <div class="dark-track-name now">Teardrop</div>
+              <div class="dark-track-artist">Massive Attack</div>
+            </div>
+            <div class="dark-badge db-teal">Because you liked</div>
+            <div class="dark-duration">5:30</div>
+          </div>
+          <div class="dark-track">
+            <div class="dark-track-num">3</div>
+            <div class="dark-thumb dt-3"></div>
+            <div class="dark-track-info">
+              <div class="dark-track-name">Glory Box</div>
+              <div class="dark-track-artist">Portishead</div>
+            </div>
+            <div class="dark-badge db-coral">New release</div>
+            <div class="dark-duration">5:06</div>
+          </div>
+        </div>
+        <div class="dark-player">
+          <div class="dark-player-art"></div>
+          <div class="dark-player-info">
+            <div class="dark-player-name">Teardrop</div>
+            <div class="dark-player-artist">Massive Attack</div>
+          </div>
+          <div class="dark-progress-wrap">
+            <div class="dark-progress-bar"><div class="dark-progress-fill"></div></div>
+            <div class="dark-times"><span class="dark-time">2:18</span><span class="dark-time">5:30</span></div>
+          </div>
+          <button class="dark-play-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIGHT -->
+    <div>
+      <div class="panel-label light">Light mode (Pastel Neon)</div>
+      <div class="light-preview">
+        <div class="swatch-row">
+          <div class="swatch"><div class="swatch-block sl-bg"></div><span class="swatch-name" style="color:#9b88b8">BG #faf9ff</span></div>
+          <div class="swatch"><div class="swatch-block sl-surface"></div><span class="swatch-name" style="color:#9b88b8">Surface</span></div>
+          <div class="swatch"><div class="swatch-block sl-surface2"></div><span class="swatch-name" style="color:#9b88b8">Hover</span></div>
+          <div class="swatch"><div class="swatch-block sl-fg"></div><span class="swatch-name" style="color:#9b88b8">FG</span></div>
+          <div class="swatch"><div class="swatch-block sl-fg2"></div><span class="swatch-name" style="color:#9b88b8">FG-2</span></div>
+          <div class="swatch"><div class="swatch-block sl-accent"></div><span class="swatch-name" style="color:#9b88b8">Orange</span></div>
+          <div class="swatch"><div class="swatch-block sl-purple"></div><span class="swatch-name" style="color:#9b88b8">Purple</span></div>
+          <div class="swatch"><div class="swatch-block sl-coral"></div><span class="swatch-name" style="color:#9b88b8">Coral</span></div>
+          <div class="swatch"><div class="swatch-block sl-teal"></div><span class="swatch-name" style="color:#9b88b8">Teal</span></div>
+        </div>
+        <div class="mock-title">App preview</div>
+        <div class="light-header">
+          <div class="light-logo">signal<span>.fm</span></div>
+          <button class="light-connect-btn">Connect Spotify</button>
+        </div>
+        <div class="light-feed">
+          <div class="light-track">
+            <div class="light-track-num">1</div>
+            <div class="light-thumb lt-1"></div>
+            <div class="light-track-info">
+              <div class="light-track-name">Motion Picture Soundtrack</div>
+              <div class="light-track-artist">Radiohead</div>
+            </div>
+            <div class="light-badge lb-purple">Similar artist</div>
+            <div class="light-duration">4:12</div>
+          </div>
+          <div class="light-track">
+            <div class="light-track-num">2</div>
+            <div class="light-thumb lt-2"></div>
+            <div class="light-track-info">
+              <div class="light-track-name now">Teardrop</div>
+              <div class="light-track-artist">Massive Attack</div>
+            </div>
+            <div class="light-badge lb-teal">Because you liked</div>
+            <div class="light-duration">5:30</div>
+          </div>
+          <div class="light-track">
+            <div class="light-track-num">3</div>
+            <div class="light-thumb lt-3"></div>
+            <div class="light-track-info">
+              <div class="light-track-name">Glory Box</div>
+              <div class="light-track-artist">Portishead</div>
+            </div>
+            <div class="light-badge lb-coral">New release</div>
+            <div class="light-duration">5:06</div>
+          </div>
+        </div>
+        <div class="light-player">
+          <div class="light-player-art"></div>
+          <div class="light-player-info">
+            <div class="light-player-name">Teardrop</div>
+            <div class="light-player-artist">Massive Attack</div>
+          </div>
+          <div class="light-progress-wrap">
+            <div class="light-progress-bar"><div class="light-progress-fill"></div></div>
+            <div class="light-times"><span class="light-time">2:18</span><span class="light-time">5:30</span></div>
+          </div>
+          <button class="light-play-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note">
+    <strong>Updated:</strong> Warm orange (#e87040 dark / #c55f38 light) replaces cyan everywhere — CTA button, play button, now-playing highlight, progress bar, logo dot. The deep purple void background and purple/coral/teal signal badges are unchanged.
+  </div>
+</body>
+</html>

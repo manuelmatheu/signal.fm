@@ -59,9 +59,8 @@ Key CSS vars: `--bg`, `--bg-2`, `--fg`, `--fg-2`, `--fg-3`, `--surface`, `--surf
 `--purple-bg`, `--teal`, `--teal-bg`, `--coral`, `--coral-bg`, `--card-shadow`,
 `--card-shadow-hover`, `--input-bg`, `--header-bg`, `--player-bg`, `--player-border`.
 
-The authoritative token definitions live in `design-system/tokens.css`. Never hardcode
-hex values in CSS -- always use tokens. For UI work, read `design-system/MASTER.md` first;
-page-specific overrides live in `design-system/pages/` (currently contains `README.md` only).
+All token definitions live in `css/style.css` (`:root` for light, `[data-theme="dark"]` for dark).
+Never hardcode hex values in CSS -- always use tokens.
 
 ---
 
