@@ -272,7 +272,7 @@ function startPollingFallback() {
 
 async function matchToSpotify(lfmTrack) {
   var q = 'track:' + lfmTrack.name + ' artist:' + lfmTrack.artist;
-  var data = await spGet('/search?q=' + encodeURIComponent(q) + '&type=track&limit=5');
+  var data = await spGet('/search?q=' + encodeURIComponent(q) + '&type=track&limit=5&market=from_token');
   if (!data) return null;
   var items = (data.tracks && data.tracks.items) || [];
   if (items.length === 0) return null;
@@ -322,12 +322,12 @@ async function savePlaylist() {
 // ---- Like/unlike ----
 
 async function likeTrack(trackId) {
-  await spPut('/me/library', { uris: ['spotify:track:' + trackId] });
+  await spPut('/me/tracks', { ids: [trackId] });
   likedSet.add(trackId);
 }
 
 async function unlikeTrack(trackId) {
-  await spDelete('/me/library', { uris: ['spotify:track:' + trackId] });
+  await spDelete('/me/tracks', { ids: [trackId] });
   likedSet.delete(trackId);
 }
 
@@ -358,8 +358,7 @@ async function checkLikedTracks(trackIds) {
   if (trackIds.length === 0) return;
   for (var i = 0; i < trackIds.length; i += 50) {
     var batch = trackIds.slice(i, i + 50);
-    var uris = batch.map(function(id) { return 'spotify:track:' + id; });
-    var data = await spGet('/me/library/contains?uris=' + uris.join(','));
+    var data = await spGet('/me/tracks/contains?ids=' + batch.join(','));
     if (!data) continue;
     for (var j = 0; j < batch.length; j++) {
       if (data[j]) likedSet.add(batch[j]);

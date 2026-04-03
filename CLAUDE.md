@@ -54,8 +54,14 @@ All functions and variables are global (`var`). No modules, no build step, no bu
 CSS variables in `:root` (light) and `[data-theme="dark"]` (dark). Theme stored in
 `localStorage('mixtape_theme')`. Inline IIFE in `<head>` applies theme before render.
 
-Key CSS vars: `--bg`, `--fg`, `--surface`, `--border`, `--border-s`, `--rust`, `--gold`,
-`--sage`, `--card-shadow`, `--input-bg`, `--error-bg`.
+Key CSS vars: `--bg`, `--bg-2`, `--fg`, `--fg-2`, `--fg-3`, `--surface`, `--surface-2`,
+`--border`, `--border-s`, `--accent`, `--accent-glow`, `--accent-dim`, `--purple`,
+`--purple-bg`, `--teal`, `--teal-bg`, `--coral`, `--coral-bg`, `--card-shadow`,
+`--card-shadow-hover`, `--input-bg`, `--header-bg`, `--player-bg`, `--player-border`.
+
+The authoritative token definitions live in `design-system/tokens.css`. Never hardcode
+hex values in CSS -- always use tokens. For UI work, read `design-system/MASTER.md` first;
+page-specific overrides live in `design-system/pages/` (currently contains `README.md` only).
 
 ---
 
@@ -98,6 +104,14 @@ var heardUris = new Set();      // Spotify URIs already shown in feed
 var sessionFeed = [];           // ordered array of resolved track objects
 var candidateBuffer = [];       // pre-generated next batch
 var isLoadingMore = false;      // infinite scroll guard
+
+// Player state
+var spotifyPlayer = null;       // Web Playback SDK instance
+var currentTrack = null;        // currently playing track object
+var isPlaying = false;
+var likedSet = new Set();       // URIs the user has liked
+var pollTimer = null;           // setInterval handle for mobile fallback
+var userMarket = null;          // ISO 3166-1 alpha-2 from /me
 ```
 
 ### Seed pool build on load (`seeds.js`)
@@ -188,6 +202,7 @@ SDK `player_state_changed` events drive updates; `pollNowPlaying()` is the remot
 | `signal_lfm_username` | Optional Last.fm username |
 | `signal_artist_ids` | Artist name -> Spotify ID cache (24h TTL) |
 | `signal_seeds_date` | Last seed pool build time (ISO timestamp) |
+| `spotify_token_expiry` | Token expiry timestamp (ms) |
 
 ---
 
@@ -200,6 +215,29 @@ SDK `player_state_changed` events drive updates; `pollNowPlaying()` is the remot
 - `heardUris` deduplication is feed-level only (cleared on page reload)
 - Pre-generate `candidateBuffer` in background while user listens
 - ASCII-only in HTML comments
+
+---
+
+## Additional pages
+
+- `index.html` -- the main app
+- `changelog.html` -- standalone reading page; uses the same `css/style.css` and theme IIFE, but suppresses the ambient layer with `body::before { display: none }` via inline `<style>`. No JS beyond the theme IIFE.
+
+---
+
+## Cinematic ambient layer
+
+Two fixed `<img>` elements (`#ambient-img-a`, `#ambient-img-b`) in `index.html` crossfade (1.4s ease) on each track change, driven by `updateAmbient(artUrl)` in `player.js`. The currently-playing album art is blurred (`blur(80px) saturate(1.8)`) and covers the full viewport at `z-index: -2`. A `body::before` gradient overlay sits at `z-index: -1` to keep text readable. `changelog.html` opts out of this layer entirely.
+
+Key globals in `player.js`: `_ambientUseA` (bool toggle), `_ambientLastUrl` (dedup guard). Call `updateAmbient(artUrl)` whenever the track changes -- it is already wired into the SDK `player_state_changed` handler.
+
+---
+
+## Current development status
+
+See `ROADMAP.md` for the full phase breakdown. Phases 1--3 are complete (v0.3): core feed,
+all four signals, signal toggles, Last.fm username connect, and the like/skip feedback loop.
+Phase 4 (daily refresh, save as playlist, heard-tracks persistence) is next.
 
 ---
 
