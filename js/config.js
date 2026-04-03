@@ -14,8 +14,8 @@ var SCOPES = [
 ].join(' ');
 
 // Last.fm
-var LFM_KEY = '177b9e8ee70fe2325bfff606cfdaee23';
-var LFM_SECRET = 'YOUR_LFM_SECRET_HERE'; // replace with your Last.fm API secret from last.fm/api/accounts
+var LFM_KEY = '35b9210a31f6be765b5baf6e17671d9c';
+var LFM_SECRET = 'ac71f5ce209b921af390c2914c3bd47d'; // replace with your Last.fm API secret from last.fm/api/accounts
 var LFM_SESSION_KEY = localStorage.getItem('signal_lfm_session') || null;
 
 // Seed pool -- weighted map of artists and tracks driving all four signals
