@@ -153,12 +153,6 @@ async function loadNextBatch() {
     sessionFeed.push.apply(sessionFeed, resolved);
     renderTracks(resolved);
 
-    // Check liked status for new tracks
-    var ids = resolved.map(function(t) { return t.id; });
-    checkLikedTracks(ids).then(function() {
-      updateLikedStatesInFeed();
-    });
-
     // Show save playlist button
     document.getElementById('save-playlist-btn').style.display = '';
   }
@@ -363,16 +357,16 @@ function autoplayFirstTrack() {
   if (sessionFeed.length === 0) return;
   var uri = sessionFeed[0].uri;
 
-  if (sdkReady) {
+  if (sdkReady && sdkDeviceId) {
     playFromFeed(uri);
     return;
   }
 
-  // Wait up to 3s for SDK, then play anyway via remote fallback
+  // Wait up to 5s for SDK device to be ready before attempting playback
   var attempts = 0;
   var check = setInterval(function() {
     attempts++;
-    if (sdkReady || attempts >= 6) {
+    if ((sdkReady && sdkDeviceId) || attempts >= 10) {
       clearInterval(check);
       playFromFeed(uri);
     }
@@ -486,9 +480,14 @@ async function init() {
 
   updateSeedDisplay();
 
-  // Pre-seed heardUris with library tracks so they are excluded from the feed
+  // Pre-seed heardUris with library tracks so they are excluded from the feed.
+  // Also populate likedSet from the same data -- avoids needing /me/tracks/contains.
   var libraryUris = await fetchSavedTracks(500);
-  for (var li = 0; li < libraryUris.length; li++) heardUris.add(libraryUris[li]);
+  for (var li = 0; li < libraryUris.length; li++) {
+    heardUris.add(libraryUris[li]);
+    var trackId = libraryUris[li].split(':')[2];
+    if (trackId) likedSet.add(trackId);
+  }
 
   // Show feed, hide loading
   document.getElementById('feed-loading').style.display = 'none';
