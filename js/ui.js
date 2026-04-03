@@ -83,6 +83,8 @@ function getBadgeText(track) {
       return track._sourceDetail ? 'Because you liked ' + track._sourceDetail : 'Similar track';
     case 'new_release':
       return 'New release';
+    case 'deep_cut':
+      return track._sourceDetail ? track._sourceDetail + ' deep cut' : 'Deep cut';
     case 'lfm_recommended':
       return 'Last.fm picks';
     default:
@@ -213,24 +215,64 @@ function updateLikedStatesInFeed() {
 
 // ---- Signal toggles ----
 
+function onSignalToggle() {
+  candidateBuffer = [];
+  if (!currentTrack || !sdkDeviceId) return;
+
+  // Find current track position in feed
+  var idx = -1;
+  for (var i = 0; i < sessionFeed.length; i++) {
+    if (sessionFeed[i].uri === currentTrack.uri) { idx = i; break; }
+  }
+  if (idx === -1) return;
+
+  // Remove un-played tracks so they can be re-fetched with new signal weights
+  var removed = sessionFeed.splice(idx + 1);
+  for (var i = 0; i < removed.length; i++) heardUris.delete(removed[i].uri);
+
+  // Remove their DOM cards
+  var cards = document.querySelectorAll('#feed .track-item');
+  for (var i = idx + 1; i < cards.length; i++) cards[i].remove();
+
+  // Load fresh batch immediately
+  if (isLoadingMore) return;
+  isLoadingMore = true;
+  loadNextBatch().then(function() {
+    isLoadingMore = false;
+    // Update Spotify queue with new tail
+    var newIdx = -1;
+    for (var i = 0; i < sessionFeed.length; i++) {
+      if (sessionFeed[i].uri === currentTrack.uri) { newIdx = i; break; }
+    }
+    if (newIdx !== -1) {
+      var uris = sessionFeed.map(function(t) { return t.uri; });
+      spotifyPlay(uris, newIdx);
+    }
+  }).catch(function() { isLoadingMore = false; });
+}
+
 function initSignalToggles() {
   document.getElementById('toggle-artist-similar').addEventListener('change', function(e) {
     signalWeights.artistSimilar = e.target.checked;
-    candidateBuffer = []; // clear buffer to refetch
+    onSignalToggle();
   });
   document.getElementById('toggle-track-similar').addEventListener('change', function(e) {
     signalWeights.trackSimilar = e.target.checked;
-    candidateBuffer = [];
+    onSignalToggle();
   });
   document.getElementById('toggle-new-releases').addEventListener('change', function(e) {
     signalWeights.newReleases = e.target.checked;
-    candidateBuffer = [];
+    onSignalToggle();
+  });
+  document.getElementById('toggle-deep-cuts').addEventListener('change', function(e) {
+    signalWeights.deepCuts = e.target.checked;
+    onSignalToggle();
   });
   var lfmRecToggle = document.getElementById('toggle-lfm-recommended');
   if (lfmRecToggle) {
     lfmRecToggle.addEventListener('change', function(e) {
       signalWeights.lfmRecommended = e.target.checked;
-      candidateBuffer = [];
+      onSignalToggle();
     });
   }
 }

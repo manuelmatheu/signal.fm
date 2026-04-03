@@ -68,6 +68,8 @@ body::before {
   --coral-bg:      rgba(224, 24, 90, 0.10);
   --gold:          #b45309;
   --gold-bg:       rgba(180, 83, 9, 0.10);
+  --amber:         #0284c7;
+  --amber-bg:      rgba(2, 132, 199, 0.10);
 
   --card-shadow:       0 2px 12px rgba(124, 58, 237, 0.07);
   --card-shadow-hover: 0 6px 32px rgba(124, 58, 237, 0.12);
@@ -114,6 +116,8 @@ body::before {
   --coral-bg:      rgba(255, 108, 149, 0.12);
   --gold:          #f59e0b;
   --gold-bg:       rgba(245, 158, 11, 0.12);
+  --amber:         #38bdf8;
+  --amber-bg:      rgba(56, 189, 248, 0.12);
 
   --card-shadow:       0 4px 24px rgba(0, 0, 0, 0.56);
   --card-shadow-hover: 0 8px 64px rgba(182, 160, 255, 0.08);
@@ -358,6 +362,7 @@ a:hover { text-decoration: underline; }
 .chip-purple { background: var(--purple-bg); color: var(--purple); }
 .chip-teal   { background: var(--teal-bg);   color: var(--teal); }
 .chip-coral  { background: var(--coral-bg);  color: var(--coral); }
+.chip-amber  { background: var(--amber-bg);  color: var(--amber); }
 .chip-gold   { background: var(--gold-bg);   color: var(--gold); }
 .signal-chip:has(input:not(:checked)) { opacity: 0.35; }
 .signal-chip:hover { opacity: 1 !important; }
@@ -668,6 +673,7 @@ a:hover { text-decoration: underline; }
 .source-artist_similar  { background: var(--purple-bg); color: var(--purple); }
 .source-track_similar   { background: var(--teal-bg);   color: var(--teal); }
 .source-new_release     { background: var(--coral-bg);  color: var(--coral); }
+.source-deep_cut        { background: var(--amber-bg);  color: var(--amber); }
 .source-lfm_recommended { background: var(--gold-bg);   color: var(--gold); }
 
 /* Duration */

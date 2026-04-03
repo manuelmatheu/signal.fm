@@ -151,6 +151,23 @@ async function getSimilarTracks(trackName, artistName, limit) {
   });
 }
 
+async function getArtistDeepCuts(artistName, limit) {
+  limit = limit || 50;
+  var data = await lfm({
+    method: 'artist.getTopTracks',
+    artist: artistName,
+    limit: String(limit),
+    autocorrect: '1'
+  });
+  if (!data || !data.toptracks || !data.toptracks.track) return [];
+  var tracks = data.toptracks.track;
+  if (!Array.isArray(tracks)) tracks = [tracks];
+  // Skip top 10 (well-known hits), take positions 11-30
+  return tracks.slice(10, 30).map(function(t) {
+    return { name: t.name, artist: artistName, mbid: t.mbid || null, _source: 'deep_cut', _sourceDetail: artistName };
+  });
+}
+
 async function getUserRecentTracks(username, limit) {
   limit = limit || 50;
   var data = await lfm({

@@ -245,6 +245,14 @@ async function fetchCandidates() {
     }
   }
 
+  // Deep cuts: artist.getTopTracks positions 11-30 for seed artists
+  if (signalWeights.deepCuts && artistNames.length > 0) {
+    var deepPick = artistNames.slice(0, 2);
+    for (var dc = 0; dc < deepPick.length; dc++) {
+      promises.push(getArtistDeepCuts(deepPick[dc]));
+    }
+  }
+
   // New releases
   if (signalWeights.newReleases) {
     promises.push(getNewReleasesForSeeds());

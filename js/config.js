@@ -29,6 +29,7 @@ var signalWeights = {
   artistSimilar:   true,
   trackSimilar:    true,
   newReleases:     true,
+  deepCuts:        true,
   lfmRecommended:  true
 };
 
