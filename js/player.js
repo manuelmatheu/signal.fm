@@ -46,6 +46,7 @@ function onSDKStateChange(state) {
 
   updatePlayerBar();
   highlightNowPlaying(currentTrack.uri);
+  if (typeof checkQueueRefill === 'function') checkQueueRefill();
 }
 
 // ---- Polling fallback for mobile ----

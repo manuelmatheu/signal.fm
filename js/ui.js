@@ -100,6 +100,35 @@ function escapeAttr(str) {
   return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// ---- Queue refill: load more when 3 tracks from end ----
+
+function checkQueueRefill() {
+  if (!currentTrack || isLoadingMore) return;
+  var idx = -1;
+  for (var i = 0; i < sessionFeed.length; i++) {
+    if (sessionFeed[i].uri === currentTrack.uri) { idx = i; break; }
+  }
+  if (idx === -1) return;
+  if (sessionFeed.length - 1 - idx > 3) return;
+
+  isLoadingMore = true;
+  loadNextBatch().then(function() {
+    isLoadingMore = false;
+    // Extend Spotify's queue with the new tracks
+    if (!sdkDeviceId || !currentTrack) return;
+    var newIdx = -1;
+    for (var i = 0; i < sessionFeed.length; i++) {
+      if (sessionFeed[i].uri === currentTrack.uri) { newIdx = i; break; }
+    }
+    if (newIdx === -1) return;
+    var uris = sessionFeed.map(function(t) { return t.uri; });
+    var savedPos = currentTrack.position || 0;
+    spotifyPlay(uris, newIdx).then(function() {
+      if (savedPos > 2000) setTimeout(function() { spotifySeek(savedPos); }, 500);
+    });
+  }).catch(function() { isLoadingMore = false; });
+}
+
 // ---- Infinite scroll ----
 
 function initInfiniteScroll() {
@@ -503,9 +532,6 @@ async function init() {
 
   // Autoplay first track
   autoplayFirstTrack();
-
-  // Start infinite scroll
-  initInfiniteScroll();
 
   // Start polling fallback if SDK not ready after 5s
   setTimeout(function() {
