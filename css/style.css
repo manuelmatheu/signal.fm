@@ -321,6 +321,55 @@ a:hover { text-decoration: underline; }
 .badge-coral  { background: var(--coral-bg);  color: var(--coral); }
 .badge-gold   { background: var(--gold-bg);   color: var(--gold); }
 
+/* ---- Signal filter chips ---- */
+.signal-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 0 2px;
+}
+.filters-label {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+.signal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  line-height: 1;
+  user-select: none;
+  transition: opacity 150ms, background 150ms;
+}
+.signal-chip input[type="checkbox"] { display: none; }
+.chip-purple { background: var(--purple-bg); color: var(--purple); }
+.chip-teal   { background: var(--teal-bg);   color: var(--teal); }
+.chip-coral  { background: var(--coral-bg);  color: var(--coral); }
+.chip-gold   { background: var(--gold-bg);   color: var(--gold); }
+.signal-chip:has(input:not(:checked)) { opacity: 0.35; }
+.signal-chip:hover { opacity: 1 !important; }
+.chip-lfm-connect {
+  background: transparent;
+  color: var(--fg-3);
+  border: 1px solid var(--border-s);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.chip-lfm-connect:hover { background: var(--hover-s); color: var(--fg-2); }
+
 .lfm-input-row { display: flex; gap: 6px; }
 .lfm-input-row .input-field { flex: 1; min-width: 0; }
 .lfm-auth-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
@@ -532,7 +581,7 @@ a:hover { text-decoration: underline; }
   gap: 12px;
   padding: 9px 14px;
   cursor: pointer;
-  transition: background 100ms;
+  transition: background 100ms, transform 150ms var(--ease-out);
   animation: rowIn 0.22s var(--ease-out) both;
 }
 .track-item:hover { background: var(--hover-s); transform: translateX(2px); }

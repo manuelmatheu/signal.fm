@@ -250,20 +250,25 @@ function initLfmAuth() {
 
 function initLastfm() {
   var input = document.getElementById('lfm-username');
+  if (!input) return;
   var saved = localStorage.getItem('signal_lfm_username');
   if (saved) {
     input.value = saved;
-    document.getElementById('lfm-status').textContent = 'Connected: ' + saved;
+    var statusEl = document.getElementById('lfm-status');
+    if (statusEl) statusEl.textContent = 'Connected: ' + saved;
   }
 
-  document.getElementById('lfm-save-btn').addEventListener('click', function() {
+  var saveBtn = document.getElementById('lfm-save-btn');
+  if (!saveBtn) return;
+  saveBtn.addEventListener('click', function() {
     var val = input.value.trim();
+    var statusEl = document.getElementById('lfm-status');
     if (val) {
       localStorage.setItem('signal_lfm_username', val);
-      document.getElementById('lfm-status').textContent = 'Connected: ' + val;
+      if (statusEl) statusEl.textContent = 'Connected: ' + val;
     } else {
       localStorage.removeItem('signal_lfm_username');
-      document.getElementById('lfm-status').textContent = 'Adds scrobble history to your seed pool';
+      if (statusEl) statusEl.textContent = 'Adds scrobble history to your seed pool';
     }
   });
 }
@@ -272,6 +277,7 @@ function initLastfm() {
 
 function updateSeedDisplay() {
   var container = document.getElementById('seed-artist-list');
+  if (!container) return;
   var entries = Object.entries(seedPool.artists);
   entries.sort(function(a, b) { return b[1] - a[1]; });
 
@@ -453,17 +459,14 @@ async function init() {
   // Check if connected
   if (!accessToken) {
     document.getElementById('welcome-screen').style.display = 'flex';
-    document.getElementById('connect-btn').style.display = '';
     document.getElementById('disconnect-btn').style.display = 'none';
 
-    document.getElementById('connect-btn').addEventListener('click', startAuth);
     document.getElementById('welcome-connect-btn').addEventListener('click', startAuth);
     return;
   }
 
   // Connected state
   document.getElementById('welcome-screen').style.display = 'none';
-  document.getElementById('connect-btn').style.display = 'none';
   document.getElementById('disconnect-btn').style.display = '';
   document.getElementById('feed-loading').style.display = 'flex';
 
@@ -490,6 +493,8 @@ async function init() {
   // Show feed, hide loading
   document.getElementById('feed-loading').style.display = 'none';
   document.getElementById('feed').style.display = 'block';
+  var filtersEl = document.getElementById('signal-filters');
+  if (filtersEl) filtersEl.style.display = '';
 
   // Load first batch
   await loadNextBatch();

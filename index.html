@@ -28,13 +28,6 @@
   <header class="app-header">
     <div class="header-left">
       <h1 class="logo">signal<span class="logo-dot">.fm</span></h1>
-      <button id="hamburger-btn" class="icon-btn hamburger-btn" title="Menu" aria-label="Toggle menu">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <line x1="3" y1="12" x2="21" y2="12"/>
-          <line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
     </div>
     <div class="header-right">
       <button id="theme-toggle" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">
@@ -42,59 +35,12 @@
         <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       </button>
       <button id="save-playlist-btn" class="btn btn-secondary" style="display:none;">Save Playlist</button>
-      <button id="connect-btn" class="btn btn-primary">Connect Spotify</button>
       <button id="disconnect-btn" class="btn btn-secondary" style="display:none;">Disconnect</button>
     </div>
   </header>
 
   <!-- Main layout -->
   <div class="main-layout">
-
-    <!-- Sidebar: signal toggles and Last.fm -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-section">
-        <h3 class="sidebar-title">Signals</h3>
-        <label class="toggle-row">
-          <input type="checkbox" id="toggle-artist-similar" checked>
-          <span class="toggle-label">Artist similarity</span>
-          <span class="badge badge-purple">Last.fm</span>
-        </label>
-        <label class="toggle-row">
-          <input type="checkbox" id="toggle-track-similar" checked>
-          <span class="toggle-label">Track similarity</span>
-          <span class="badge badge-teal">Last.fm</span>
-        </label>
-        <label class="toggle-row">
-          <input type="checkbox" id="toggle-new-releases" checked>
-          <span class="toggle-label">New releases</span>
-          <span class="badge badge-coral">Spotify</span>
-        </label>
-        <label class="toggle-row" id="toggle-row-lfm-recommended" style="display:none;">
-          <input type="checkbox" id="toggle-lfm-recommended" checked>
-          <span class="toggle-label">Last.fm picks</span>
-          <span class="badge badge-gold">Last.fm</span>
-        </label>
-      </div>
-      <div class="sidebar-section">
-        <h3 class="sidebar-title">Last.fm (optional)</h3>
-        <div class="lfm-input-row">
-          <input type="text" id="lfm-username" placeholder="Last.fm username" class="input-field">
-          <button id="lfm-save-btn" class="btn btn-small">Save</button>
-        </div>
-        <p class="sidebar-hint" id="lfm-status">Adds scrobble history to your seed pool</p>
-        <div class="lfm-auth-row">
-          <button id="lfm-connect-btn" class="btn btn-small">Connect Last.fm</button>
-          <span class="sidebar-hint" id="lfm-rec-status">Connect for personalized recommendations</span>
-        </div>
-      </div>
-      <div class="sidebar-section">
-        <h3 class="sidebar-title">Seed Artists</h3>
-        <div id="seed-artist-list" class="seed-list">
-          <p class="sidebar-hint">Connect Spotify to see your seeds</p>
-        </div>
-      </div>
-    </aside>
-    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 
     <!-- Feed -->
     <main class="feed-container">
@@ -140,6 +86,29 @@
       <div id="feed-loading" class="feed-loading" style="display:none;">
         <div class="spinner"></div>
         <p>Building your discovery feed...</p>
+      </div>
+
+      <!-- Signal filters (shown when connected) -->
+      <div class="signal-filters" id="signal-filters" style="display:none;">
+        <span class="filters-label">Signals</span>
+        <label class="signal-chip chip-purple" for="toggle-artist-similar">
+          <input type="checkbox" id="toggle-artist-similar" checked>
+          Artist similarity
+        </label>
+        <label class="signal-chip chip-teal" for="toggle-track-similar">
+          <input type="checkbox" id="toggle-track-similar" checked>
+          Track similarity
+        </label>
+        <label class="signal-chip chip-coral" for="toggle-new-releases">
+          <input type="checkbox" id="toggle-new-releases" checked>
+          New releases
+        </label>
+        <label class="signal-chip chip-gold" for="toggle-lfm-recommended" id="toggle-row-lfm-recommended" style="display:none;">
+          <input type="checkbox" id="toggle-lfm-recommended" checked>
+          Last.fm picks
+        </label>
+        <button id="lfm-connect-btn" class="signal-chip chip-lfm-connect">Connect Last.fm</button>
+        <span id="lfm-rec-status" style="display:none;"></span>
       </div>
 
       <!-- Feed context / liner notes -->
