@@ -89,7 +89,7 @@ function needsSeedRebuild() {
 async function expandFromArtist(seedArtistName) {
   var similar = await getSimilarArtists(seedArtistName, 15);
   var trackCandidates = [];
-  var topArtists = similar.slice(0, 5);
+  var topArtists = similar.slice(0, 3);
   var market = userMarket || 'US';
 
   for (var j = 0; j < topArtists.length; j++) {
@@ -158,7 +158,9 @@ async function getNewReleasesForSeeds() {
     var data = await spGet('/search?q=artist:' + encodeURIComponent(artistName) + '&type=album&limit=10&market=' + market);
     if (!data || !data.albums || !data.albums.items) continue;
 
+    var albumsFetched = 0;
     for (var j = 0; j < data.albums.items.length; j++) {
+      if (albumsFetched >= 2) break; // max 2 album-track calls per artist
       var album = data.albums.items[j];
       // Verify primary artist matches (search can return loose results)
       var artistMatch = album.artists.some(function(a) {
@@ -169,6 +171,7 @@ async function getNewReleasesForSeeds() {
       var releaseDate = new Date(album.release_date).getTime();
       if (releaseDate < cutoff) continue;
 
+      albumsFetched++;
       // Fetch first 3 tracks from qualifying album
       var tracks = await spGet('/albums/' + album.id + '/tracks?limit=3');
       if (!tracks || !tracks.items) continue;
@@ -211,10 +214,9 @@ async function fetchCandidates() {
 
   var promises = [];
 
-  // Artist similarity
+  // Artist similarity — limit to 2 seed artists to keep Spotify call count manageable
   if (signalWeights.artistSimilar && artistNames.length > 0) {
-    // Pick 3 random seed artists per batch
-    var pick = artistNames.slice(0, 3);
+    var pick = artistNames.slice(0, 2);
     for (var a = 0; a < pick.length; a++) {
       promises.push(expandFromArtist(pick[a]));
     }

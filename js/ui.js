@@ -170,6 +170,8 @@ async function loadNextBatch() {
     if (c._resolved || c._source === 'new_release') {
       track = c;
     } else {
+      // Small delay between Spotify search calls to avoid 429s
+      await new Promise(function(r) { setTimeout(r, 120); });
       track = await matchToSpotify(c);
     }
     if (!track) continue;
