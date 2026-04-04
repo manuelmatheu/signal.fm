@@ -251,26 +251,42 @@ function onSignalToggle() {
   }).catch(function() { isLoadingMore = false; });
 }
 
+function animateChip(checkbox, isOn) {
+  var label = checkbox.closest('.signal-chip');
+  if (!label) return;
+  label.classList.remove('chip-anim-on', 'chip-anim-off');
+  void label.offsetWidth;
+  label.classList.add(isOn ? 'chip-anim-on' : 'chip-anim-off');
+  label.addEventListener('animationend', function() {
+    label.classList.remove('chip-anim-on', 'chip-anim-off');
+  }, { once: true });
+}
+
 function initSignalToggles() {
   document.getElementById('toggle-artist-similar').addEventListener('change', function(e) {
+    animateChip(e.target, e.target.checked);
     signalWeights.artistSimilar = e.target.checked;
     onSignalToggle();
   });
   document.getElementById('toggle-track-similar').addEventListener('change', function(e) {
+    animateChip(e.target, e.target.checked);
     signalWeights.trackSimilar = e.target.checked;
     onSignalToggle();
   });
   document.getElementById('toggle-new-releases').addEventListener('change', function(e) {
+    animateChip(e.target, e.target.checked);
     signalWeights.newReleases = e.target.checked;
     onSignalToggle();
   });
   document.getElementById('toggle-deep-cuts').addEventListener('change', function(e) {
+    animateChip(e.target, e.target.checked);
     signalWeights.deepCuts = e.target.checked;
     onSignalToggle();
   });
   var lfmRecToggle = document.getElementById('toggle-lfm-recommended');
   if (lfmRecToggle) {
     lfmRecToggle.addEventListener('change', function(e) {
+      animateChip(e.target, e.target.checked);
       signalWeights.lfmRecommended = e.target.checked;
       onSignalToggle();
     });

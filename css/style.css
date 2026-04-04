@@ -343,6 +343,25 @@ a:hover { text-decoration: underline; }
   margin-right: 4px;
   flex-shrink: 0;
 }
+/* Chip entrance */
+@keyframes chipIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.88); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+/* Toggle ON: signal switching on */
+@keyframes chipPop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.14); }
+  65%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+/* Toggle OFF: signal going quiet */
+@keyframes chipOff {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+
 .signal-chip {
   display: inline-flex;
   align-items: center;
@@ -356,16 +375,42 @@ a:hover { text-decoration: underline; }
   border: none;
   line-height: 1;
   user-select: none;
-  transition: opacity 150ms, background 150ms;
+  transition: opacity 200ms, transform 180ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms;
+  animation: chipIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .signal-chip input[type="checkbox"] { display: none; }
+
+/* Staggered entrance by position in the strip */
+.signal-filters .signal-chip:nth-child(2) { animation-delay: 0ms; }
+.signal-filters .signal-chip:nth-child(3) { animation-delay: 65ms; }
+.signal-filters .signal-chip:nth-child(4) { animation-delay: 130ms; }
+.signal-filters .signal-chip:nth-child(5) { animation-delay: 195ms; }
+.signal-filters .signal-chip:nth-child(7) { animation-delay: 260ms; }
+
 .chip-purple { background: var(--purple-bg); color: var(--purple); }
 .chip-teal   { background: var(--teal-bg);   color: var(--teal); }
 .chip-coral  { background: var(--coral-bg);  color: var(--coral); }
 .chip-amber  { background: var(--amber-bg);  color: var(--amber); }
 .chip-gold   { background: var(--gold-bg);   color: var(--gold); }
-.signal-chip:has(input:not(:checked)) { opacity: 0.35; }
-.signal-chip:hover { opacity: 1 !important; }
+
+/* Inactive: dimmed */
+.signal-chip:has(input:not(:checked)) { opacity: 0.32; }
+
+/* Hover: lift + per-color glow */
+.signal-chip:hover                { opacity: 1 !important; transform: translateY(-2px); }
+.chip-purple:hover                { box-shadow: 0 4px 20px var(--purple-bg); }
+.chip-teal:hover                  { box-shadow: 0 4px 20px var(--teal-bg); }
+.chip-coral:hover                 { box-shadow: 0 4px 20px var(--coral-bg); }
+.chip-amber:hover                 { box-shadow: 0 4px 20px var(--amber-bg); }
+.chip-gold:hover                  { box-shadow: 0 4px 20px var(--gold-bg); }
+
+/* Press: quick tactile dip */
+.signal-chip:active { transform: scale(0.92) translateY(0) !important; transition-duration: 60ms; }
+
+/* JS-driven toggle animations */
+.signal-chip.chip-anim-on  { animation: chipPop 360ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.signal-chip.chip-anim-off { animation: chipOff 260ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
 .chip-lfm-connect {
   background: transparent;
   color: var(--fg-3);
@@ -373,7 +418,7 @@ a:hover { text-decoration: underline; }
   font-size: 0.75rem;
   font-weight: 500;
 }
-.chip-lfm-connect:hover { background: var(--hover-s); color: var(--fg-2); }
+.chip-lfm-connect:hover { background: var(--hover-s); color: var(--fg-2); box-shadow: none; }
 
 .lfm-input-row { display: flex; gap: 6px; }
 .lfm-input-row .input-field { flex: 1; min-width: 0; }
