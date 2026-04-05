@@ -598,20 +598,26 @@ async function init() {
   var filtersEl = document.getElementById('signal-filters');
   if (filtersEl) filtersEl.style.display = '';
 
-  // Show Last.fm hint if not connected
+  // Show Last.fm hint if no username or session connected
   var lfmHint = document.getElementById('generate-lfm-hint');
-  if (lfmHint && !LFM_SESSION_KEY) lfmHint.style.display = '';
+  if (lfmHint && !localStorage.getItem('signal_lfm_username') && !LFM_SESSION_KEY) lfmHint.style.display = '';
 
   document.getElementById('generate-screen').style.display = 'flex';
 
   // Generate button -- runs inside a user gesture so autoplay works
   document.getElementById('generate-feed-btn').addEventListener('click', async function() {
+    this.disabled = true;
     document.getElementById('generate-screen').style.display = 'none';
     document.getElementById('feed').style.display = 'block';
 
-    await loadNextBatch();
-    renderFeedContext();
-    autoplayFirstTrack();
+    try {
+      await loadNextBatch();
+      renderFeedContext();
+      autoplayFirstTrack();
+    } catch (e) {
+      console.error('Feed generation failed', e);
+      document.getElementById('feed-empty').style.display = '';
+    }
 
     // Start polling fallback if SDK not ready after 5s
     setTimeout(function() {
