@@ -42,6 +42,7 @@ var POLL_INTERVAL = 5000; // 5s for mobile fallback
 
 // Session state
 var heardUris = new Set();
+var heardArtists = new Set();   // artist names already shown this session (lowercase)
 var sessionFeed = [];
 var isLoadingMore = false;
 var candidateBuffer = []; // pre-generated next batch
