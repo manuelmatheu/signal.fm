@@ -93,7 +93,12 @@ async function exchangeLfmToken(token) {
   var params = { method: 'auth.getSession', api_key: LFM_KEY, token: token };
   params.api_sig = lfmSign(params);
   params.format = 'json';
-  var resp = await fetch(LFM_BASE + '?' + new URLSearchParams(params));
+  var body = new URLSearchParams(params);
+  var resp = await fetch(LFM_BASE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString()
+  });
   if (!resp.ok) {
     var errBody = await resp.json().catch(function() { return {}; });
     console.warn('Last.fm session exchange failed', resp.status, 'error:', errBody.error, errBody.message);
