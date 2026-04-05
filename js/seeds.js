@@ -99,20 +99,33 @@ function needsSeedRebuild() {
 // ---- Expand from artist (artist.getSimilar) ----
 
 async function expandFromArtist(seedArtistName) {
-  var similar = await getSimilarArtists(seedArtistName, 15);
-  var trackCandidates = [];
-  var topArtists = similar.slice(0, 3);
   var market = userMarket || 'US';
+  var trackCandidates = [];
 
-  for (var j = 0; j < topArtists.length; j++) {
-    var name = topArtists[j].name;
-    // Use search instead of /artists/{id}/top-tracks (avoids 403 catalog restriction)
+  // 1st-hop: similar artists from Last.fm
+  var similar1 = await getSimilarArtists(seedArtistName, 20);
+  var hop1 = similar1.filter(function(a) { return !isKnownArtist(a.name); });
+
+  // 2nd-hop: similar artists of the top 1st-hop result
+  var hop2 = [];
+  if (hop1.length > 0) {
+    var pivot = hop1[0].name;
+    var similar2 = await getSimilarArtists(pivot, 20);
+    hop2 = similar2.filter(function(a) {
+      return !isKnownArtist(a.name) && a.name.toLowerCase() !== seedArtistName.toLowerCase();
+    });
+  }
+
+  // Mix: 2 from 1st-hop + 2 from 2nd-hop
+  var pool = hop1.slice(0, 2).concat(hop2.slice(0, 2));
+
+  for (var j = 0; j < pool.length; j++) {
+    var name = pool[j].name;
     var data = await spGet('/search?q=artist:' + encodeURIComponent(name) + '&type=track&limit=3&market=' + market);
     if (!data || !data.tracks || !data.tracks.items) continue;
 
     for (var k = 0; k < data.tracks.items.length; k++) {
       var t = data.tracks.items[k];
-      // Only tracks where the primary artist matches
       if (t.artists[0].name.toLowerCase() !== name.toLowerCase()) continue;
       trackCandidates.push({
         uri: t.uri,
