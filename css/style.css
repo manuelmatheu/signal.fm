@@ -20,7 +20,7 @@
   width: calc(100% + 160px);
   height: calc(100% + 160px);
   object-fit: cover;
-  filter: blur(80px) saturate(1.8);
+  filter: blur(40px) saturate(1.6);
   opacity: 0;
   transition: opacity 1.4s ease;
   transform: scale(1.1);
@@ -1016,7 +1016,7 @@ a:hover { text-decoration: underline; }
   .player-track-info { min-width: 120px; max-width: 160px; }
   .player-art { width: 42px; height: 42px; }
   .player-bar.is-playing .player-art { width: 48px; height: 48px; }
-  .ambient-img { filter: blur(60px) saturate(1.6); }
+  .ambient-img { filter: blur(40px) saturate(1.4); }
   .ambient-img.active { opacity: 0.28; }
   .player-volume-wrap { display: none; }
   .player-progress-wrap { display: none; }
