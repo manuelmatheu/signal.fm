@@ -524,9 +524,16 @@ async function handleCallback() {
   // Last.fm auth callback
   var lfmToken = params.get('token');
   if (lfmToken && !params.get('code')) {
+    if (window.opener) {
+      // We're in the popup -- hand token to parent and close
+      window.opener.postMessage({ type: 'lfm_token', token: lfmToken }, window.location.origin);
+      window.close();
+      return false;
+    }
+    // Fallback: redirect flow (no popup)
     await exchangeLfmToken(lfmToken);
     window.history.replaceState({}, '', window.location.pathname);
-    return false; // not a Spotify connect
+    return false;
   }
 
   // Spotify OAuth callback

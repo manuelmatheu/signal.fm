@@ -77,22 +77,16 @@ function startLfmAuth(onSuccess) {
     return;
   }
 
-  var timer = setInterval(function() {
-    try {
-      if (popup.closed) { clearInterval(timer); return; }
-      var params = new URLSearchParams(popup.location.search);
-      var token = params.get('token');
-      if (token) {
-        clearInterval(timer);
-        popup.close();
-        exchangeLfmToken(token).then(function(key) {
-          if (key && typeof onSuccess === 'function') onSuccess();
-        });
-      }
-    } catch (e) {
-      // Cross-origin while on Last.fm pages -- keep polling
-    }
-  }, 500);
+  // Popup will postMessage the token back when it lands on the callback URL
+  function onMessage(e) {
+    if (e.origin !== window.location.origin) return;
+    if (!e.data || e.data.type !== 'lfm_token') return;
+    window.removeEventListener('message', onMessage);
+    exchangeLfmToken(e.data.token).then(function(key) {
+      if (key && typeof onSuccess === 'function') onSuccess();
+    });
+  }
+  window.addEventListener('message', onMessage);
 }
 
 async function exchangeLfmToken(token) {
