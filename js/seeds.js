@@ -27,6 +27,18 @@ async function resolveArtistId(name) {
   return artist.id;
 }
 
+// ---- Known-artist filter ----
+
+function isKnownArtist(name) {
+  if (!name) return false;
+  var lower = name.toLowerCase();
+  var keys = Object.keys(seedPool.artists);
+  for (var i = 0; i < keys.length; i++) {
+    if (keys[i].toLowerCase() === lower) return true;
+  }
+  return false;
+}
+
 // ---- Resolve Spotify IDs for all seed artists ----
 
 async function resolveSpotifyArtistIds() {
@@ -274,6 +286,16 @@ async function fetchCandidates() {
   for (var r = 0; r < results.length; r++) {
     if (results[r]) all = all.concat(results[r]);
   }
+
+  // Filter known seed artists from discovery signals (keep new_release exempt)
+  // Also filter artists already shown this session
+  all = all.filter(function(c) {
+    if (!c.artist) return true;
+    var lower = c.artist.toLowerCase();
+    if (heardArtists.has(lower)) return false;
+    if (c._source !== 'new_release' && isKnownArtist(c.artist)) return false;
+    return true;
+  });
 
   // Shuffle all candidates
   for (var s = all.length - 1; s > 0; s--) {
