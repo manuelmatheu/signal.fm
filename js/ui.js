@@ -580,18 +580,12 @@ async function init() {
   // Init SDK
   initSpotifySDK();
 
-  // Build or rebuild seed pool
-  if (needsSeedRebuild() || justConnected) {
-    await buildSeedPool();
-  } else {
-    // Restore seed pool from top artists at minimum
-    await buildSeedPool();
-  }
-
+  // Build seed pool
+  await buildSeedPool();
   updateSeedDisplay();
 
   // Pre-seed heardUris with library tracks so they are excluded from the feed.
-  // Also populate likedSet from the same data -- avoids needing /me/tracks/contains.
+  // Also populate likedSet from the same data.
   var libraryUris = await fetchSavedTracks(500);
   for (var li = 0; li < libraryUris.length; li++) {
     heardUris.add(libraryUris[li]);
@@ -599,25 +593,31 @@ async function init() {
     if (trackId) likedSet.add(trackId);
   }
 
-  // Show feed, hide loading
+  // Show signal filters + generate screen; hide loading
   document.getElementById('feed-loading').style.display = 'none';
-  document.getElementById('feed').style.display = 'block';
   var filtersEl = document.getElementById('signal-filters');
   if (filtersEl) filtersEl.style.display = '';
 
-  // Load first batch
-  await loadNextBatch();
+  // Show Last.fm hint if not connected
+  var lfmHint = document.getElementById('generate-lfm-hint');
+  if (lfmHint && !LFM_SESSION_KEY) lfmHint.style.display = '';
 
-  // Show feed context
-  renderFeedContext();
+  document.getElementById('generate-screen').style.display = 'flex';
 
-  // Autoplay first track
-  autoplayFirstTrack();
+  // Generate button -- runs inside a user gesture so autoplay works
+  document.getElementById('generate-feed-btn').addEventListener('click', async function() {
+    document.getElementById('generate-screen').style.display = 'none';
+    document.getElementById('feed').style.display = 'block';
 
-  // Start polling fallback if SDK not ready after 5s
-  setTimeout(function() {
-    if (!sdkReady) startPollingFallback();
-  }, 5000);
+    await loadNextBatch();
+    renderFeedContext();
+    autoplayFirstTrack();
+
+    // Start polling fallback if SDK not ready after 5s
+    setTimeout(function() {
+      if (!sdkReady) startPollingFallback();
+    }, 5000);
+  });
 }
 
 // ---- Bootstrap ----
