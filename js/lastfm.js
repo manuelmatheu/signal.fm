@@ -67,8 +67,32 @@ function lfmSign(params) {
 
 // ---- Last.fm authentication ----
 
-function startLfmAuth() {
-  window.location.href = 'https://www.last.fm/api/auth?api_key=' + LFM_KEY + '&cb=' + encodeURIComponent(REDIRECT_URI);
+function startLfmAuth(onSuccess) {
+  var authUrl = 'https://www.last.fm/api/auth?api_key=' + LFM_KEY + '&cb=' + encodeURIComponent(REDIRECT_URI);
+  var popup = window.open(authUrl, 'lfm_auth', 'width=500,height=600,left=200,top=100');
+
+  // If popup was blocked, fall back to redirect
+  if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+    window.location.href = authUrl;
+    return;
+  }
+
+  var timer = setInterval(function() {
+    try {
+      if (popup.closed) { clearInterval(timer); return; }
+      var params = new URLSearchParams(popup.location.search);
+      var token = params.get('token');
+      if (token) {
+        clearInterval(timer);
+        popup.close();
+        exchangeLfmToken(token).then(function(key) {
+          if (key && typeof onSuccess === 'function') onSuccess();
+        });
+      }
+    } catch (e) {
+      // Cross-origin while on Last.fm pages -- keep polling
+    }
+  }, 500);
 }
 
 async function exchangeLfmToken(token) {

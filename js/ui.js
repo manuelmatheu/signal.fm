@@ -325,7 +325,21 @@ function initLfmAuth() {
     });
   } else {
     setDisconnected();
-    btn.addEventListener('click', startLfmAuth);
+    function onConnectClick() {
+      startLfmAuth(function() {
+        btn.removeEventListener('click', onConnectClick);
+        setConnected();
+        btn.addEventListener('click', function onDisconnectClick() {
+          LFM_SESSION_KEY = null;
+          localStorage.removeItem('signal_lfm_session');
+          candidateBuffer = [];
+          setDisconnected();
+          btn.removeEventListener('click', onDisconnectClick);
+          btn.addEventListener('click', onConnectClick);
+        });
+      });
+    }
+    btn.addEventListener('click', onConnectClick);
   }
 }
 
