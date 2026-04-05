@@ -178,6 +178,7 @@ async function loadNextBatch() {
     if (heardUris.has(track.uri)) continue;
 
     heardUris.add(track.uri);
+    if (track.artist) heardArtists.add(track.artist.toLowerCase());
     resolved.push(track);
     if (resolved.length >= FEED_BATCH_SIZE) break;
   }
@@ -230,7 +231,10 @@ function onSignalToggle() {
 
   // Remove un-played tracks so they can be re-fetched with new signal weights
   var removed = sessionFeed.splice(idx + 1);
-  for (var i = 0; i < removed.length; i++) heardUris.delete(removed[i].uri);
+  for (var i = 0; i < removed.length; i++) {
+    heardUris.delete(removed[i].uri);
+    if (removed[i].artist) heardArtists.delete(removed[i].artist.toLowerCase());
+  }
 
   // Remove their DOM cards
   var cards = document.querySelectorAll('#feed .track-item');
