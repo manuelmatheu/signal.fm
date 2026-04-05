@@ -116,8 +116,10 @@ async function expandFromArtist(seedArtistName) {
     });
   }
 
-  // Mix: 2 from 1st-hop + 2 from 2nd-hop
-  var pool = hop1.slice(0, 2).concat(hop2.slice(0, 2));
+  // Mix: 2 from 1st-hop + 2 from 2nd-hop (dedup across hops)
+  var usedNames = new Set(hop1.slice(0, 2).map(function(a) { return a.name.toLowerCase(); }));
+  var hop2Unique = hop2.filter(function(a) { return !usedNames.has(a.name.toLowerCase()); });
+  var pool = hop1.slice(0, 2).concat(hop2Unique.slice(0, 2));
 
   for (var j = 0; j < pool.length; j++) {
     var name = pool[j].name;
