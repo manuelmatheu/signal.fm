@@ -115,6 +115,17 @@
         <span id="lfm-rec-status" style="display:none;"></span>
       </div>
 
+      <!-- Generate screen (shown after seeds load, before feed is generated) -->
+      <div id="generate-screen" class="generate-screen" style="display:none;">
+        <div class="generate-screen-inner">
+          <div class="generate-screen-icon">&#x1F4E1;</div>
+          <h2 class="generate-screen-title">Your discovery feed</h2>
+          <p class="generate-screen-tagline">Choose which signals to use, then generate your personal feed of tracks you haven't heard yet.</p>
+          <button id="generate-feed-btn" class="btn btn-primary btn-large">Generate my feed &rarr;</button>
+          <span id="generate-lfm-hint" class="generate-lfm-hint" style="display:none;">Connect Last.fm above for personalised picks</span>
+        </div>
+      </div>
+
       <!-- Feed context / liner notes -->
       <div id="feed-context" class="feed-context" style="display:none;">
         <button id="feed-context-toggle" class="feed-context-toggle">
