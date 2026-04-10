@@ -28,8 +28,8 @@ function md5(str) {
   }
   var len8 = l * 8;
   m[l >> 2] |= 0x80 << ((l % 4) * 8);
-  m[((l + 72) >> 6 << 4) + 14] = len8 & 0xffffffff;
-  m[((l + 72) >> 6 << 4) + 15] = Math.floor(len8 / 4294967296);
+  m[((l + 72) >> 6 << 4) - 2] = len8 & 0xffffffff;
+  m[((l + 72) >> 6 << 4) - 1] = Math.floor(len8 / 4294967296);
 
   var a = state[0], b = state[1], c = state[2], d = state[3];
   for (i = 0; i < m.length; i += 16) {
