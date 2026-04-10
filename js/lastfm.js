@@ -113,7 +113,11 @@ async function getLfmRecommendedTracks(limit) {
   var params = { method: 'user.getRecommendedTracks', api_key: LFM_KEY, sk: LFM_SESSION_KEY, limit: String(limit) };
   params.api_sig = lfmSign(params);
   params.format = 'json';
-  var resp = await fetch(LFM_BASE + '?' + new URLSearchParams(params));
+  var resp = await fetch(LFM_BASE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(params).toString()
+  });
   if (!resp.ok) { console.warn('getLfmRecommendedTracks error', resp.status); return []; }
   var data = await resp.json();
   if (!data || !data.recommendations || !data.recommendations.track) return [];
