@@ -108,21 +108,73 @@ async function exchangeLfmToken(token) {
   return null;
 }
 
-// ---- Last.fm personalized recommendations ----
+// ---- Last.fm personalized recommendations via radio station ----
+// Uses radio.tune (lastfm://user/{username}/recommended) + radio.getPlaylist.
+// Requires session key (authenticated) and username. Works for Last.fm subscribers.
 
 async function getLfmRecommendedTracks(limit) {
   var lfmUser = localStorage.getItem('signal_lfm_username');
-  if (!lfmUser) return [];
-  limit = limit || 50;
-  // user.getRecommendedTracks was removed from the Last.fm API (error 3).
-  // Fall back to user.getLovedTracks -- explicit loves are strong taste signal.
-  var data = await lfm({ method: 'user.getLovedTracks', user: lfmUser, limit: String(limit) });
-  if (!data || !data.lovedtracks || !data.lovedtracks.track) return [];
-  var tracks = data.lovedtracks.track;
-  if (!Array.isArray(tracks)) tracks = [tracks];
-  return tracks.map(function(t) {
-    return { name: t.name, artist: t.artist ? t.artist.name : '', mbid: t.mbid || null };
+  if (!LFM_SESSION_KEY || !lfmUser) return [];
+  limit = limit || 20;
+
+  // Step 1: tune to the personalized recommended station
+  var tuneParams = {
+    method: 'radio.tune',
+    station: 'lastfm://user/' + lfmUser + '/recommended',
+    api_key: LFM_KEY,
+    sk: LFM_SESSION_KEY
+  };
+  tuneParams.api_sig = lfmSign(tuneParams);
+  tuneParams.format = 'json';
+  var tuneResp = await fetch(LFM_BASE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(tuneParams).toString()
   });
+  if (!tuneResp.ok) {
+    var tuneErr = await tuneResp.text().catch(function() { return '(no body)'; });
+    console.warn('getLfmRecommendedTracks radio.tune error', tuneResp.status, tuneErr);
+    return [];
+  }
+  var tuneData = await tuneResp.json();
+  if (tuneData && tuneData.error) {
+    console.warn('getLfmRecommendedTracks radio.tune api error', tuneData.error, tuneData.message);
+    return [];
+  }
+
+  // Step 2: pull playlist batches (~5 tracks per call) until we have enough
+  var playParams = { method: 'radio.getPlaylist', api_key: LFM_KEY, sk: LFM_SESSION_KEY };
+  playParams.api_sig = lfmSign(playParams);
+  playParams.format = 'json';
+  var playBody = new URLSearchParams(playParams).toString();
+  var all = [];
+  var maxBatches = Math.ceil(limit / 5);
+  for (var i = 0; i < maxBatches && all.length < limit; i++) {
+    var playResp = await fetch(LFM_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: playBody
+    });
+    if (!playResp.ok) {
+      var playErr = await playResp.text().catch(function() { return '(no body)'; });
+      console.warn('getLfmRecommendedTracks radio.getPlaylist error', playResp.status, playErr);
+      break;
+    }
+    var data = await playResp.json();
+    if (data && data.error) {
+      console.warn('getLfmRecommendedTracks radio.getPlaylist api error', data.error, data.message);
+      break;
+    }
+    if (!data || !data.playlist || !data.playlist.track) break;
+    var batch = data.playlist.track;
+    if (!Array.isArray(batch)) batch = [batch];
+    if (!batch.length) break;
+    for (var j = 0; j < batch.length; j++) {
+      var t = batch[j];
+      if (t.title && t.creator) all.push({ name: t.title, artist: t.creator, mbid: null });
+    }
+  }
+  return all.slice(0, limit);
 }
 
 async function lfm(params) {
