@@ -259,7 +259,7 @@ a:hover { text-decoration: underline; }
 /* ---- Main layout ---- */
 .main-layout {
   display: flex;
-  max-width: 1200px;
+  max-width: 820px;
   margin: 0 auto;
   min-height: calc(100vh - 56px);
 }
@@ -285,7 +285,7 @@ a:hover { text-decoration: underline; }
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   padding: 0 2px;
 }
 .filters-label {
@@ -380,11 +380,11 @@ a:hover { text-decoration: underline; }
   flex: 1;
   display: flex;
   align-items: center;
-  padding: 64px 48px;
+  padding: 64px 4px;
 }
 .welcome-content {
   text-align: left;
-  max-width: 540px;
+  max-width: 500px;
 }
 
 /* Welcome signal chips */
@@ -420,25 +420,25 @@ a:hover { text-decoration: underline; }
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 16px;
+  gap: 0;
   max-width: 420px;
 }
 
 .generate-screen-title {
   font-family: 'DM Serif Display', serif;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 400;
   color: var(--fg);
-  margin: 0;
+  margin: 0 0 10px;
   letter-spacing: -0.02em;
 }
 
 .generate-screen-tagline {
   color: var(--fg-3);
-  font-size: 14px;
+  font-size: 0.88rem;
   line-height: 1.6;
-  margin: 0;
-  max-width: 340px;
+  margin: 0 0 32px;
+  max-width: 320px;
 }
 
 .generate-lfm-hint {
@@ -470,7 +470,7 @@ a:hover { text-decoration: underline; }
 /* ---- Feed ---- */
 .feed-container {
   flex: 1;
-  padding: 24px;
+  padding: 32px 20px;
   min-width: 0;
 }
 
@@ -515,7 +515,7 @@ a:hover { text-decoration: underline; }
 .feed-context {
   background: var(--surface);
   border-radius: var(--radius-m);
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   overflow: hidden;
 }
 .feed-context-toggle {
@@ -922,8 +922,8 @@ a:hover { text-decoration: underline; }
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
   .main-layout { flex-direction: column; }
-  .feed-container { padding: 10px; }
-  .welcome-screen { padding: 40px 24px; }
+  .feed-container { padding: 16px 12px; }
+  .welcome-screen { padding: 48px 4px; }
   .welcome-content h2 { font-size: 2.2rem; }
   .track-item { padding: 8px 12px; gap: 10px; }
   .track-num-wrap { display: none; }
