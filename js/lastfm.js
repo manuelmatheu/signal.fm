@@ -110,15 +110,22 @@ async function exchangeLfmToken(token) {
 async function getLfmRecommendedTracks(limit) {
   if (!LFM_SESSION_KEY) return [];
   limit = limit || 50;
-  var params = { method: 'user.getRecommendedTracks', api_key: LFM_KEY, sk: LFM_SESSION_KEY, limit: String(limit) };
+  // Note: limit intentionally excluded from signed params -- user.getRecommendedTracks
+  // does not accept limit in its signature; pass it unsigned after the sig is computed.
+  var params = { method: 'user.getRecommendedTracks', api_key: LFM_KEY, sk: LFM_SESSION_KEY };
   params.api_sig = lfmSign(params);
   params.format = 'json';
+  params.limit = String(limit);
   var resp = await fetch(LFM_BASE, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams(params).toString()
   });
-  if (!resp.ok) { console.warn('getLfmRecommendedTracks error', resp.status); return []; }
+  if (!resp.ok) {
+    var errBody = await resp.text().catch(function() { return '(no body)'; });
+    console.warn('getLfmRecommendedTracks error', resp.status, errBody);
+    return [];
+  }
   var data = await resp.json();
   if (!data || !data.recommendations || !data.recommendations.track) return [];
   var tracks = data.recommendations.track;
