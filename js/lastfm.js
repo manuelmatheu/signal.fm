@@ -116,7 +116,7 @@ async function getLfmRecommendedTracks(limit) {
   var lfmUser = localStorage.getItem('signal_lfm_username');
   if (!lfmUser) return [];
   limit = limit || 26;
-  var url = 'https://www.last.fm/player/station/user/' + encodeURIComponent(lfmUser) + '/recommended';
+  var url = '/api/lfm-station?user=' + encodeURIComponent(lfmUser);
   var resp = await fetch(url, { headers: { 'Accept': 'application/json' } }).catch(function(err) {
     console.warn('getLfmRecommendedTracks fetch error (CORS?)', err.message);
     return null;
