@@ -99,6 +99,9 @@ async function exchangeLfmToken(token) {
   if (data && data.session && data.session.key) {
     LFM_SESSION_KEY = data.session.key;
     localStorage.setItem('signal_lfm_session', LFM_SESSION_KEY);
+    if (data.session.name) {
+      localStorage.setItem('signal_lfm_username', data.session.name);
+    }
     return LFM_SESSION_KEY;
   }
   console.warn('Last.fm session exchange error', data);
@@ -108,27 +111,14 @@ async function exchangeLfmToken(token) {
 // ---- Last.fm personalized recommendations ----
 
 async function getLfmRecommendedTracks(limit) {
-  if (!LFM_SESSION_KEY) return [];
+  var lfmUser = localStorage.getItem('signal_lfm_username');
+  if (!lfmUser) return [];
   limit = limit || 50;
-  // Note: limit intentionally excluded from signed params -- user.getRecommendedTracks
-  // does not accept limit in its signature; pass it unsigned after the sig is computed.
-  var params = { method: 'user.getRecommendedTracks', api_key: LFM_KEY, sk: LFM_SESSION_KEY };
-  params.api_sig = lfmSign(params);
-  params.format = 'json';
-  params.limit = String(limit);
-  var resp = await fetch(LFM_BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams(params).toString()
-  });
-  if (!resp.ok) {
-    var errBody = await resp.text().catch(function() { return '(no body)'; });
-    console.warn('getLfmRecommendedTracks error', resp.status, errBody);
-    return [];
-  }
-  var data = await resp.json();
-  if (!data || !data.recommendations || !data.recommendations.track) return [];
-  var tracks = data.recommendations.track;
+  // user.getRecommendedTracks was removed from the Last.fm API (error 3).
+  // Fall back to user.getLovedTracks -- explicit loves are strong taste signal.
+  var data = await lfm({ method: 'user.getLovedTracks', user: lfmUser, limit: String(limit) });
+  if (!data || !data.lovedtracks || !data.lovedtracks.track) return [];
+  var tracks = data.lovedtracks.track;
   if (!Array.isArray(tracks)) tracks = [tracks];
   return tracks.map(function(t) {
     return { name: t.name, artist: t.artist ? t.artist.name : '', mbid: t.mbid || null };
