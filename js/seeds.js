@@ -287,8 +287,8 @@ async function fetchCandidates() {
     promises.push(getNewReleasesForSeeds());
   }
 
-  // Last.fm radio recommendations -- requires session key + username (subscriber feature)
-  if (signalWeights.lfmRecommended && LFM_SESSION_KEY && localStorage.getItem('signal_lfm_username')) {
+  // Last.fm personalized discovery -- requires only a username (public endpoint)
+  if (signalWeights.lfmRecommended && localStorage.getItem('signal_lfm_username')) {
     promises.push((async function() {
       var recs = await getLfmRecommendedTracks(50);
       return recs.map(function(t) {

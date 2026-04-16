@@ -303,19 +303,16 @@ function initSignalToggles() {
 
 function initLfmAuth() {
   var btn = document.getElementById('lfm-connect-btn');
-  var statusEl = document.getElementById('lfm-rec-status');
   var toggleRow = document.getElementById('toggle-row-lfm-recommended');
   if (!btn) return;
 
   function setConnected() {
-    btn.textContent = 'Disconnect';
-    statusEl.textContent = 'Personalized picks enabled';
+    btn.textContent = 'Disconnect Last.fm';
     if (toggleRow) toggleRow.style.display = '';
   }
 
   function setDisconnected() {
     btn.textContent = 'Connect Last.fm';
-    statusEl.textContent = 'Connect for personalized recommendations';
     if (toggleRow) toggleRow.style.display = 'none';
   }
 
@@ -555,11 +552,9 @@ async function handleCallback() {
 
 async function init() {
   initTheme();
-  initLastfm();
   initLfmAuth();
   initSignalToggles();
   initPlayerControls();
-  initHamburgerMenu();
 
   // Handle OAuth callback
   var justConnected = await handleCallback();
@@ -586,7 +581,6 @@ async function init() {
 
   // Build seed pool
   await buildSeedPool();
-  updateSeedDisplay();
 
   // Pre-seed heardUris with library tracks so they are excluded from the feed.
   // Also populate likedSet from the same data.
