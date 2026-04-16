@@ -174,6 +174,26 @@
     <h1 class="cl-heading">Changelog</h1>
     <p class="cl-sub">Version history for signal.fm</p>
 
+    <!-- v0.5 -->
+    <div class="cl-entry">
+      <div class="cl-meta">
+        <span class="cl-version">v0.5</span>
+        <span class="cl-dot major"></span>
+      </div>
+      <div class="cl-body">
+        <div class="cl-row">
+          <span class="cl-date">2026-04-16</span>
+          <span class="cl-tag tag-major">Major</span>
+        </div>
+        <ul class="cl-list">
+          <li><strong>Last.fm picks fixed</strong> &mdash; the official Last.fm recommendation APIs were removed (error 3); rebuilt on Last.fm&rsquo;s internal web player station endpoint, proxied through a Vercel serverless function (<code>api/lfm-station.js</code>) to bypass CORS</li>
+          <li><strong>OAuth saves username</strong> &mdash; Last.fm OAuth now auto-stores your username from the session response; no manual entry needed to activate the picks signal</li>
+          <li><strong>UI polish</strong> &mdash; removed a banned side-stripe CSS pattern from the now-playing indicator; redesigned the welcome screen (signal pills, left-aligned headline) and generate screen (cleaner typographic hierarchy); removed ~80 lines of dead CSS from the removed sidebar</li>
+          <li><strong>Layout</strong> &mdash; feed column narrowed to 820px for comfortable reading width; established spatial rhythm between signal filters, feed context, and track list</li>
+        </ul>
+      </div>
+    </div>
+
     <!-- v0.4 -->
     <div class="cl-entry">
       <div class="cl-meta">

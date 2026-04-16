@@ -11,13 +11,14 @@ listens, likes, and the feed adapts in real time.
 
 **Repo:** https://github.com/manuelmatheu/signal-fm
 **Live:** https://signal-fm.vercel.app/
-**Stack:** Vanilla JS, no framework, no build step. Spotify Web API + Web Playback SDK + Last.fm API.
+**Stack:** Vanilla JS, no framework, no build step. Spotify Web API + Web Playback SDK + Last.fm API + Vercel serverless.
 
 ---
 
 ## Commands
 
 There is no build step. Open `index.html` directly in a browser or serve with any static file server.
+For full functionality (Last.fm picks signal), use `vercel dev` to run serverless functions locally.
 
 **Syntax check before committing:**
 ```
@@ -35,6 +36,27 @@ node --check js/ui.js
 
 ## Architecture
 
+### File structure
+
+```
+signal.fm/
+├── index.html          -- main app HTML
+├── changelog.html      -- standalone changelog reading page
+├── CLAUDE.md           -- this file
+├── ROADMAP.md          -- feature roadmap with version history
+├── api/
+│   └── lfm-station.js  -- Vercel serverless CORS proxy for Last.fm picks endpoint
+├── css/
+│   └── style.css       -- all styles: theme tokens, feed, player bar, ambient
+└── js/
+    ├── config.js       -- API keys, OAuth scopes, all global state variables
+    ├── spotify.js      -- PKCE OAuth, token refresh, Spotify API helpers, SDK init
+    ├── lastfm.js       -- Last.fm API calls, MD5 auth signatures, getLfmRecommendedTracks
+    ├── seeds.js        -- seed pool build, expand, reweight, new releases, fetchCandidates
+    ├── player.js       -- SDK events, polling fallback, player bar, ambient background
+    └── ui.js           -- feed render, infinite scroll, signal toggles, init()
+```
+
 ### Script load order (strict -- no modules)
 
 ```html
@@ -51,13 +73,17 @@ All functions and variables are global (`var`). No modules, no build step, no bu
 
 ### Design system
 
-The visual design is documented in `DESIGN.md` -- "The Neon Pulse" (deep purple void / electric neon accent).
-Key rules: no 1px solid borders (use background shifts instead), no pure grey, glassmorphism player bar,
+The visual design is "The Neon Pulse" (deep purple void / electric neon accent).
+Key rules: no side-stripe borders (use background shifts instead), no pure grey, glassmorphism player bar,
 cinematic ambient background layer driven by current album art.
 
 CSS variables in `:root` (light) and `[data-theme="dark"]` (dark). Theme stored in
 `localStorage('mixtape_theme')`. Inline IIFE in `<head>` applies theme before render.
 Never hardcode hex values in CSS -- always use tokens.
+
+**Absolute CSS ban:** `border-left` or `border-right` wider than 1px as a colored accent stripe,
+and `box-shadow: inset` used as a side-stripe substitute. The now-playing indicator uses
+background tint + accent text color + album art glow only.
 
 ---
 
@@ -72,13 +98,31 @@ track cards with a source badge. Signals can be toggled via `signalWeights` in `
 | Track similarity | `trackSimilar` | `track.getSimilar` (Last.fm) | teal |
 | New releases | `newReleases` | Spotify album search | coral |
 | Deep cuts | `deepCuts` | `artist.getTopTracks` positions 11-30 | gold |
-| Last.fm recommendations | `lfmRecommended` | `user.getRecommendedTracks` (requires session key) | -- |
+| Last.fm recommendations | `lfmRecommended` | `/api/lfm-station` proxy (no session key needed) | -- |
 
 `fetchCandidates()` in `seeds.js` runs all active signals in parallel via `Promise.all`.
 New releases skip `matchToSpotify()` -- already Spotify-native. All other signals need it.
 
 New releases use Spotify search (`/search?q=artist:...&type=album`) instead of `/artists/{id}/albums`
 to avoid 403 catalog restriction errors. Capped to top 5 seed artists (`NEW_RELEASE_MAX_ARTISTS`).
+
+### Last.fm picks: how it works
+
+The official Last.fm radio/recommendation APIs (`user.getRecommendedTracks`, `radio.tune`,
+`radio.getPlaylist`) all return error 3 -- they were removed from the API.
+
+The working approach uses Last.fm's internal web player station endpoint:
+`https://www.last.fm/player/station/user/{username}/recommended`
+
+This endpoint returns ~26 personalized tracks as JSON (no auth required, just a username).
+Because it blocks cross-origin requests, `api/lfm-station.js` is a Vercel serverless function
+that fetches it server-side and relays the response with permissive CORS headers.
+
+The lfmRecommended signal gate in `seeds.js` checks for `localStorage('signal_lfm_username')`
+only (not `LFM_SESSION_KEY`) -- the endpoint is public, no session needed.
+
+`exchangeLfmToken()` saves both `session.key` AND `session.name` to localStorage, so the
+username is automatically available after OAuth without a separate input step.
 
 ---
 
@@ -185,7 +229,7 @@ var LFM_SECRET = '...'; // used only for API signature -- treat as sensitive
 | `getSimilarTracks(name, artist)` | `track.getSimilar` | Expand seed tracks |
 | `getArtistDeepCuts(name)` | `artist.getTopTracks` | Positions 11-30 (skip hits) |
 | `getUserRecentTracks(user)` | `user.getRecentTracks` | Optional Last.fm seeding |
-| `getLfmRecommendedTracks(limit)` | `user.getRecommendedTracks` | Requires session key |
+| `getLfmRecommendedTracks(limit)` | `/api/lfm-station` (Vercel proxy) | Personalized picks; requires `signal_lfm_username` in localStorage |
 
 `track.getSimilar` returns MusicBrainz IDs -- `matchToSpotify()` handles both mbid and name+artist fallback.
 
@@ -193,7 +237,8 @@ var LFM_SECRET = '...'; // used only for API signature -- treat as sensitive
 
 `startLfmAuth()` opens a popup to `last.fm/api/auth`. The callback page postMessages the token back.
 `exchangeLfmToken(token)` calls `auth.getSession` (POST with MD5 API signature) -> stores session key
-in `localStorage('signal_lfm_session')` and `LFM_SESSION_KEY` global.
+in `localStorage('signal_lfm_session')` and `LFM_SESSION_KEY` global, AND stores username in
+`localStorage('signal_lfm_username')` from `data.session.name`.
 
 API signatures use a compact inline MD5 implementation in `lastfm.js` -- SubtleCrypto doesn't support MD5.
 `lfmSign(params)` sorts non-`format` params alphabetically, concatenates key+value pairs, appends `LFM_SECRET`, returns MD5 hex.
@@ -235,8 +280,8 @@ Key globals: `_ambientUseA` (bool toggle), `_ambientLastUrl` (dedup guard).
 | `mixtape_theme` | Theme (`'dark'` / `'light'`) |
 | `spotify_token` / `spotify_refresh` | OAuth tokens |
 | `spotify_token_expiry` | Token expiry timestamp (ms) |
-| `signal_lfm_username` | Optional Last.fm username (for recent scrobbles) |
-| `signal_lfm_session` | Last.fm session key (for personalized recommendations) |
+| `signal_lfm_username` | Last.fm username (set on OAuth or manually; gates lfmRecommended signal) |
+| `signal_lfm_session` | Last.fm session key (for signed API calls if needed in future) |
 | `signal_artist_ids` | Artist name -> Spotify ID cache (24h TTL) |
 | `signal_seeds_date` | Last seed pool build time (ISO timestamp) |
 
@@ -251,6 +296,9 @@ Key globals: `_ambientUseA` (bool toggle), `_ambientLastUrl` (dedup guard).
 - Spotify may return a new refresh token on refresh -- always overwrite stored value
 - Pre-generate `candidateBuffer` in background while user listens to prevent scroll spinners
 - ASCII-only in HTML comments
+- Last.fm radio APIs (`radio.tune`, `radio.getPlaylist`, `user.getRecommendedTracks`) return error 3
+  (removed). Do not attempt to use them. The picks signal uses `/api/lfm-station` proxy instead.
+- The lfmRecommended signal only requires `signal_lfm_username` in localStorage -- no session key needed.
 
 ---
 
@@ -263,8 +311,8 @@ Key globals: `_ambientUseA` (bool toggle), `_ambientLastUrl` (dedup guard).
 
 ## Current development status
 
-Phases 1-3 complete (v0.3): core feed, all signals, signal toggles, Last.fm connect, feedback loop.
-Phase 4 (daily refresh, save as playlist, heard-tracks persistence) is next. See `ROADMAP.md`.
+v0.5: core feed, all five signals, Last.fm picks via Vercel proxy, UI polish, spatial layout.
+Phase 5 (keyboard shortcuts, heard-tracks persistence, rabbit hole mode) is next. See `ROADMAP.md`.
 
 ---
 
@@ -273,6 +321,7 @@ Phase 4 (daily refresh, save as playlist, heard-tracks persistence) is next. See
 - Vercel auto-deploys from `main`. Add each deployment URL as redirect URI in Spotify Dashboard.
 - Hard refresh (Cmd+Shift+R) on mobile after deploys.
 - Single `main` branch, direct pushes.
+- `api/lfm-station.js` requires Vercel to run -- it's a serverless function, not a static asset.
 
 ---
 
