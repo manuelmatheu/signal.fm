@@ -199,6 +199,14 @@ async function loadNextBatch() {
     sessionFeed.push.apply(sessionFeed, resolved);
     renderTracks(resolved);
 
+    // Check liked state for the exact tracks just rendered, then sync heart UI
+    var renderedIds = resolved.map(function(t) { return t.id; }).filter(Boolean);
+    if (renderedIds.length > 0) {
+      checkLikedTracks(renderedIds).then(function() {
+        updateLikedStatesInFeed();
+      }).catch(function() {});
+    }
+
     // Show save playlist button
     document.getElementById('save-playlist-btn').style.display = '';
   }
