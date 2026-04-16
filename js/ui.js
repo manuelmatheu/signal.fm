@@ -14,6 +14,10 @@ function renderTracks(tracks) {
     row.className = 'track-item';
     row.setAttribute('data-uri', t.uri);
     row.setAttribute('data-id', t.id);
+    // Stagger entrance for first batch only
+    if (startIdx === 0) {
+      row.style.animationDelay = Math.min(i * 38, 228) + 'ms';
+    }
 
     var badgeText = getBadgeText(t);
     var isLiked = likedSet.has(t.id);
@@ -21,7 +25,10 @@ function renderTracks(tracks) {
     row.innerHTML =
       '<div class="track-num-wrap">' +
         '<span class="track-num">' + rowNum + '</span>' +
-        '<span class="track-play-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>' +
+        '<span class="track-play-icon">' +
+          '<svg class="icon-track-play" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
+          '<svg class="icon-track-bars" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="0.5" y="1" width="2" height="8" rx="1"/><rect x="4" y="1" width="2" height="8" rx="1"/><rect x="7.5" y="1" width="2" height="8" rx="1"/></svg>' +
+        '</span>' +
       '</div>' +
       '<img class="track-thumb" src="' + escapeAttr(t.albumArt || '') + '" alt="" loading="lazy">' +
       '<div class="track-info">' +
@@ -58,6 +65,11 @@ function renderTracks(tracks) {
           onLike(track);
           btn.classList.add('liked');
           btn.querySelector('svg').setAttribute('fill', 'currentColor');
+          // Heart pop
+          btn.classList.remove('anim-like');
+          void btn.offsetWidth;
+          btn.classList.add('anim-like');
+          btn.addEventListener('animationend', function() { btn.classList.remove('anim-like'); }, { once: true });
         }
         updatePlayerBarHeart();
       };

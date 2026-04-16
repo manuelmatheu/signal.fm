@@ -79,8 +79,14 @@ function updatePlayerBar() {
   if (!currentTrack) return;
 
   var bar = document.getElementById('player-bar');
+  var isFirstShow = bar.style.display !== 'flex';
   bar.style.display = 'flex';
   document.body.classList.add('has-player');
+  if (isFirstShow) {
+    void bar.offsetWidth;
+    bar.classList.add('entering');
+    bar.addEventListener('animationend', function() { bar.classList.remove('entering'); }, { once: true });
+  }
 
   document.getElementById('player-art').src = currentTrack.albumArt;
   document.getElementById('player-track-name').textContent = currentTrack.name;
@@ -217,11 +223,18 @@ function initPlayerControls() {
 
   document.getElementById('player-heart').addEventListener('click', function() {
     if (!currentTrack) return;
-    if (likedSet.has(currentTrack.id)) {
+    var wasLiked = likedSet.has(currentTrack.id);
+    if (wasLiked) {
       unlikeTrack(currentTrack.id);
     } else {
       likeTrack(currentTrack.id);
       onLike(currentTrack);
+      // Heart pop
+      var heartBtn = this;
+      heartBtn.classList.remove('anim-like');
+      void heartBtn.offsetWidth;
+      heartBtn.classList.add('anim-like');
+      heartBtn.addEventListener('animationend', function() { heartBtn.classList.remove('anim-like'); }, { once: true });
     }
     updatePlayerBarHeart();
     // Update card heart too
